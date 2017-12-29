@@ -11,6 +11,12 @@ import tx
 # 3. Verifying blocks
 # 4. Maintaining the blockchain
 
+def hashTransDict(d):
+	# Delete Wallet
+	if "address" in d:
+		del d["address"]
+	return chash.doubleHashEncodeJSON(d)
+
 def calculateInflow(chain, tx):
 	totalIn = 0
 	for i in tx.inputs:
@@ -19,10 +25,10 @@ def calculateInflow(chain, tx):
 		# a valid transaction output
 		transaction = None
 		for t in block.transactions:
-			print(t.hash()) # Genesis
-			print(i["prevTransHash"])
+			# Transaction must be converted
+			# to dictionary since genesis
+			# is also a dictionary
 			if t.hash() == i["prevTransHash"]:
-				print("MATCH")
 				transaction = t
 			else:
 				# Input Transaction does not exist
@@ -31,9 +37,12 @@ def calculateInflow(chain, tx):
 		# Does the current input specify
 		# an amount to be given
 		foundAmount = False
-		for o in transaction["outputs"]:
-			if o.address == tx.wallet.address:
-				totalIn += o.amount
+		for o in transaction.outputs:
+			# CONFLICT BETWEEN WALLETS AND
+			# ADDRESSES / WILL BE RESOLVED
+			# WHEN WALLETS ARE IMPLEMENTED
+			if o["address"] == tx.address:
+				totalIn += o["amount"]
 				foundAmount = True
 
 		# If no amount given to address,
@@ -55,9 +64,6 @@ def verifyTransaction(chain, tx):
 	totalOut = calculateOutflow(tx)
 
 	if totalIn:
-		print(totalIn)
-		print(totalOut)
-
 		# If funds are sufficient
 		if totalIn >= totalOut:
 			return True
@@ -79,8 +85,10 @@ class Chain(object):
 		self.creator = creator
 
 		# Create genesis block
-		genesis = block.Genesis(self.creator)
-		self.chain.append(genesis)
+		self.genesis = block.Genesis(self.creator)
+		self.chain.append(self.genesis)
+
+		print("Genesis Hash", self.genesis.transactions[0].hash())
 
 	@property
 	def blockHeight(self):
@@ -92,7 +100,7 @@ class Chain(object):
 
 	def appendTransaction(self, transaction):
 		if verifyTransaction(self.chain, transaction):
-			mempool.add(transaction)
+			self.mempool.add(transaction)
 			return True
 		else:
 			return False
@@ -128,12 +136,22 @@ class Chain(object):
 		else:
 			return False
 
-	def display(self):
+	def displayJSON(self):
+		import json
+
 		print("Block height:", self.blockHeight)
 		newchain = []
 		for block in self.chain:
 			newblock = block.__dict__
-			newblock["transactions"] = [ t.__dict__ for t in block.transactions ]
+			newtransactions = []
+
+			for t in newblock["transactions"]:
+				if type(t).__name__ != "dict":
+					newtransactions.append(t.__dict__)
+				else:
+					newtransactions.append(t)
+
+			newblock["transactions"] = newtransactions
 			newchain.append(newblock)
 
-		print(newchain)
+		return json.dumps(newchain)

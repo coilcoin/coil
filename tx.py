@@ -21,22 +21,21 @@ def createOutput(address, amount):
 	}
 
 class Transaction(object):
-	def __init__(self, wallet, inputs, outputs):
-		self.wallet = wallet
+	def __init__(self, address, inputs, outputs):
+		self.address = address
 		self.inputs = inputs
 		self.outputs = outputs
 
 	def hash(self):
 		h = dict(self.__dict__)
-		del h["wallet"]
-		print(h)
+		del h["address"]
 		return chash.doubleHashEncodeJSON(self.__dict__)
 
 class Coinbase(Transaction):
-	def __init__(self, minerAddress):
+	def __init__(self, minerAddress, amount=50):
 		# Base reward for mining a block
 		# is 50 coilcoins (no fees)
 		inputs = []
-		outputs = [createOutput(minerAddress, 50)]
+		outputs = [createOutput(minerAddress, amount)]
 
 		super(Coinbase, self).__init__(minerAddress, inputs, outputs)

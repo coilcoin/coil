@@ -1,42 +1,29 @@
-# Coilcoin - simple cryptocurrency
-# Copyright 2017. All Rights Reserved.
-# MIT Licence
+# Coil
+# Primitive Cryptocurrency
+# Written by Jesse Sibley
+# MIT Licence (@chickencoder)
 
-from chain import Chain
-from tx import createInput, createOutput, Transaction
-from wallet import generateAddress
-import chash
+__version__ = "0.1.0"
 
-me = generateAddress("me")
-bob = generateAddress("bob")
-miner = generateAddress("miner")
+from aiohttp import web
+from wallet import Wallet
+from node import Node
 
-bc = Chain(me)
+app = web.Application()
 
-# Quickly mine a block
-n = 0
-h = bc.lastBlock.hash()
-proof = ""
-while True:
-	proof = chash.doubleHashEncode(str(h) + str(n))
-	if proof[:4] == "0000":
-		break
-	else:
-		n += 1
+# Change this soon to a
+# stored wallet
+node_creator = Wallet()
+node = Node(node_creator.address)
 
-# Create a new transaction
-# t1: Give 20 coins to bob
+# Routes
+async def index(request):
+	return web.Response(text=f"Coil instance running at {node.host}:{node.port} v{__version__}")
 
-print("Last black", bc.lastBlock.hash())
+async def chain(request):
+	return web.Response(text=node.getChain(), content_type="application/json")
 
-t1 = Transaction(me,
-	[ { "prevTransHash": h, "index": 0 } ],
-	[ createOutput(bob, 20) ]
-)
+app.router.add_get("/", index)
+app.router.add_get("/chain", chain)
 
-bc.appendTransaction(t1)
-
-bc.appendBlock(me, h, n, t1.hash())
-
-# bc.display()
-
+web.run_app(app, host=node.host, port=node.port)

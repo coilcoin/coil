@@ -25,9 +25,7 @@ class Genesis(Block):
     def __init__(self, creator):
         # ICO of 120 coins
         txs = [
-            tx.Transaction(creator, [], [
-                tx.createOutput(creator, 120)
-            ])
+            tx.Coinbase(creator, amount=120)
         ]
 
         super(Genesis, self).__init__(None, None, txs, None)
