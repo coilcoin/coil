@@ -3,6 +3,7 @@
 import chash
 import block
 import proof
+import merkle
 import tx
 
 # Chain is responsible for...
@@ -114,23 +115,20 @@ class Chain(object):
 					if tr.hash() == th:
 						txs.append(tr)
 
-			# TODO: FIX THIS TXS HASHES
-			# FIX: JUST USE ALL TRANSITIONS
-			txs = list(self.mempool)
-
 			# Create Coinbase for Miner
 			txs.append(tx.Coinbase(minerAddress))
 
-			# TODO: Create Merkle Root
-			mr = ""
+			# Generate Merkle Root
+			txs_dict = [ str(t.__dict__) for t in txs ]
+			mr = merkle.generateMerkleRoot(txs_dict)
 
 			# Add new block
 			b = block.Block(self.lastBlock.hash(), nonce, txs, mr)
 			self.chain.append(b)
 	
 			# Remove mined transactions from pool
-			# for tr in txs:
-			# 	self.mempool.remove(tr)
+			for tr in txs:
+				self.mempool.remove(tr)
 
 			return True
 		else:

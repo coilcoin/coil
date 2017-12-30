@@ -2,6 +2,7 @@
 
 import time
 import chash
+import merkle
 import tx
 
 class Block(object):
@@ -28,4 +29,7 @@ class Genesis(Block):
             tx.Coinbase(creator, amount=120)
         ]
 
-        super(Genesis, self).__init__(None, None, txs, None)
+        txs_dict = [ str(t.__dict__) for t in txs ]
+        mr = merkle.generateMerkleRoot(txs_dict)
+
+        super(Genesis, self).__init__(None, None, txs, mr)
