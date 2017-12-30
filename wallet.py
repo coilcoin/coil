@@ -1,5 +1,5 @@
 # wallet.py
-
+import key
 import chash
 import binascii
 import Crypto.Random
@@ -7,7 +7,8 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
 def generateAddress(pubkey):
-	SPECIAL_NUMBER = 17111999
+	# Use network key in address
+	SPECIAL_NUMBER = key.activation_key
 	h1 = chash.doubleHashEncode(str(pubkey))
 	h2 = chash.doubleHashEncode(str(SPECIAL_NUMBER) + h1)
 	return h2[:25]

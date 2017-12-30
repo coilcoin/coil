@@ -39,9 +39,6 @@ def calculateInflow(chain, tx):
 		# an amount to be given
 		foundAmount = False
 		for o in transaction.outputs:
-			# CONFLICT BETWEEN WALLETS AND
-			# ADDRESSES / WILL BE RESOLVED
-			# WHEN WALLETS ARE IMPLEMENTED
 			if o["address"] == tx.address:
 				totalIn += o["amount"]
 				foundAmount = True
@@ -80,7 +77,7 @@ def verifyBlock(chain, prevBlockHash, nonce, transactionHashes):
 		return False
 
 class Chain(object):
-	def __init__(self, creator):
+	def __init__(self, creator, genesis=None, chain=[]):
 		self.chain = []
 		self.mempool = set()
 		self.creator = creator
@@ -137,7 +134,6 @@ class Chain(object):
 	def displayJSON(self):
 		import json
 
-		print("Block height:", self.blockHeight)
 		newchain = []
 		for block in self.chain:
 			newblock = block.__dict__
