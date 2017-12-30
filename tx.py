@@ -21,18 +21,16 @@ def createOutput(address, amount):
 	}
 
 class Transaction(object):
-	def __init__(self, wallet, inputs, outputs):
-		self.wallet = wallet
-		self.address = self.wallet.address
+	def __init__(self, address, signature, inputs, outputs):
+		self.address = address
+		self.signature = signature
 		self.inputs = inputs
 		self.outputs = outputs
-		self.signature = wallet.sign(self.hash())
 
 	def hash(self):
 		h = dict(self.__dict__)
 		del h["address"]
-		del h["wallet"]
-		del h["signature"]
+		# del h["signature"]
 		return chash.doubleHashEncodeJSON(self.__dict__)
 
 class Coinbase(Transaction):
@@ -42,4 +40,4 @@ class Coinbase(Transaction):
 		inputs = []
 		outputs = [createOutput(minerAddress, amount)]
 
-		super(Coinbase, self).__init__(minerAddress, inputs, outputs)
+		super(Coinbase, self).__init__(minerAddress, "", inputs, outputs)

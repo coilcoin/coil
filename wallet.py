@@ -3,6 +3,7 @@ import key
 import chash
 import binascii
 import Crypto.Random
+from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
@@ -16,8 +17,11 @@ def generateAddress(pubkey):
 def verifySignature(address, message, signature):
     pubkey = RSA.importKey(binascii.unhexlify(address))
     verifier = PKCS1_v1_5.new(pubkey)
-    h = SHA.new(message.encode("utf8"))
+    h = SHA.new(message.encode('utf8'))
     return verifier.verify(h, binascii.unhexlify(signature))
+
+def exportWallet(wallet):
+	return { "importKey": str(wallet.importKey) }
 
 class Wallet(object):
     def __init__(self, importKey=""):
@@ -26,7 +30,7 @@ class Wallet(object):
             self.privateKey = RSA.generate(1024, generator)
             self.publicKey = self.privateKey.publickey()
             self.signature = PKCS1_v1_5.new(self.privateKey)
-            self.export = self.privateKey.exportKey("PEM")
+            self.importKey = self.privateKey.exportKey("PEM")
         else:
             self.privateKey = RSA.importKey(importKey)
             self.publicKey = self.privateKey.publickey()
@@ -36,5 +40,7 @@ class Wallet(object):
         self.address = generateAddress(self.publicKey)
 
     def sign(self, message):
-        h = SHA.new(message.encode("utf8"))
-        return binascii.hexlify(self.signature.sign(h)).decode("ascii")
+    	h = SHA.new(message.encode('utf8'))
+    	return binascii.hexlify(self.signature.sign(h)).decode("ascii")
+
+print(exportWallet(Wallet()))

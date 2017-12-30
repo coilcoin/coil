@@ -7,22 +7,21 @@ __version__ = "0.1.0"
 
 import json
 import base64
+from cryptography import fernet
 from aiohttp import web
 from aiohttp_session import setup, get_session, session_middleware
-from aiohttp_session.cookie_storage import EncryptedCoo
+from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
-from wallet import Wallet
+from wallet import Wallet, exportWallet
 from tx import Transaction
 from node import Node
 
-# Change this soon to a
-# stored wallet
 node_creator = Wallet()
 node = Node(node_creator.address)
 
 def respond(message):
 	txt = json.dumps({ "message": message })
-	return web.Response(text=respond(), content_type="application/json") 
+	return web.Response(text=txt, content_type="application/json") 
 
 # Routes
 async def index(request):
@@ -56,20 +55,24 @@ async def new_wallet(request):
 	data = await request.post()
 	session = await get_session(request)
 
-	if "importKey" in data and "label" in data:
+	if not "wallets" in session:
+		session["wallets"] = {}
+
+	if "importWallet" in data and "label" in data:
+		label = data["label"]
 		wallet = None
-		if data["importKey"]:
+		if data["importWallet"] == "true":
 			wallet = Wallet(importKey=data["privateKey"])
 		else:
 			wallet = Wallet()
 
 		# Store wallet in wallet bank
-		sessions["wallets"][label] = wallet
+		session["wallets"][label] = exportWallet(wallet)
 
 		return respond(f"Successfully created wallet '{label}'")
 
 	else:
-		return respond("Invalid request data")
+		return respond("Invalid request data got ono ")
 
 async def new_transaction(request):
 	"""
@@ -77,7 +80,6 @@ async def new_transaction(request):
 
 	expects...
 	{ wallet: "<label>", inputs: [  ], outputs: [ ] }
-
 	"""
 
 	data = await request.post()
@@ -115,6 +117,7 @@ def make_app():
 	app.router.add_get("/chain", chain)
 	app.router.add_get("/chain/resolve", resolve)
 	app.router.add_get("/block", block)
+	app.router.add_post("/wallet/new", new_wallet)
 
 	return app
 

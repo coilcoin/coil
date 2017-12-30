@@ -12,7 +12,7 @@ app = web.Application()
 # Change this soon to a
 # stored wallet
 node_creator = Wallet()
-node = Node(node_creator.address)
+node = Node(node_creator)
 
 async def chain(request):
 	return web.Response(text=node.getChain(), content_type="application/json")

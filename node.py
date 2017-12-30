@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from tx import Transaction, Coinbase, createInput
 from block import Block
 from chain import Chain
+from wallet import Wallet
 from time import time
 
 def log(info):
@@ -24,7 +25,7 @@ def transactionFromDict(d):
 		for o in d["outputs"]:
 			outputs.append(createOutput(o["address"], o["amount"]))
 
-		return Transaction(d["address"], inputs, outputs)
+		return Transaction(d["address"], d["signature"], inputs, outputs)
 
 def blockFromDict(d):
 	prevBlockHash = d["previousBlockHash"]
@@ -32,7 +33,6 @@ def blockFromDict(d):
 	txs = [transactionFromDict(t) for t in d["transactions"]]
 	merkleRoot = d["merkleRoot"]
 	return Block(prevBlockHash, nonce, txs, merkleRoot)
-
 
 def chainFromResponse(response):
 	blocks = [ blockFromDict(b) for b in response ]
