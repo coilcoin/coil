@@ -21,7 +21,7 @@ def verifySignature(address, message, signature):
     return verifier.verify(h, binascii.unhexlify(signature))
 
 def exportWallet(wallet):
-	return { "importKey": str(wallet.importKey) }
+	return { "importKey": wallet.importKey.decode("utf-8") }
 
 class Wallet(object):
     def __init__(self, importKey=""):
@@ -32,7 +32,7 @@ class Wallet(object):
             self.signature = PKCS1_v1_5.new(self.privateKey)
             self.importKey = self.privateKey.exportKey("PEM")
         else:
-            self.privateKey = RSA.importKey(importKey)
+            self.privateKey = RSA.importKey(importKey.encode("utf-8"))
             self.publicKey = self.privateKey.publickey()
             self.signature = PKCS1_v1_5.new(self.privateKey)
             self.importKey = importKey
@@ -42,5 +42,3 @@ class Wallet(object):
     def sign(self, message):
     	h = SHA.new(message.encode('utf8'))
     	return binascii.hexlify(self.signature.sign(h)).decode("ascii")
-
-print(exportWallet(Wallet()))

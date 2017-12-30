@@ -21,11 +21,13 @@ def createOutput(address, amount):
 	}
 
 class Transaction(object):
-	def __init__(self, address, signature, inputs, outputs):
+	def __init__(self, address, inputs, outputs):
 		self.address = address
-		self.signature = signature
 		self.inputs = inputs
 		self.outputs = outputs
+
+	def sign(self, sig):
+		self.signature = sig
 
 	def hash(self):
 		h = dict(self.__dict__)
@@ -40,4 +42,4 @@ class Coinbase(Transaction):
 		inputs = []
 		outputs = [createOutput(minerAddress, amount)]
 
-		super(Coinbase, self).__init__(minerAddress, "", inputs, outputs)
+		super(Coinbase, self).__init__(minerAddress, inputs, outputs)

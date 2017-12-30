@@ -8,4 +8,4 @@
 import chash
 
 def validProof(prevHash, nonce):
-	return chash.doubleHashEncode(str(prevHash) + str(nonce))[:4] == "0000"
+	return chash.doubleHashEncode(str(prevHash) + str(nonce))[:5] == "00000"
