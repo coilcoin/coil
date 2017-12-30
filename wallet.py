@@ -13,7 +13,7 @@ def generateAddress(pubkey):
 	h2 = chash.doubleHashEncode(str(SPECIAL_NUMBER) + h1)
 	return h2[:25]
 
-def verify_signature(address, message, signature):
+def verifySignature(address, message, signature):
     pubkey = RSA.importKey(binascii.unhexlify(address))
     verifier = PKCS1_v1_5.new(pubkey)
     h = SHA.new(message.encode("utf8"))

@@ -3,6 +3,7 @@
 import chash
 import block
 import proof
+import wallet
 import merkle
 import tx
 
@@ -58,6 +59,20 @@ def calculateOutflow(tx):
 	return totalOut
 
 def verifyTransaction(chain, tx):
+	# Verify that a single wallet
+	# owns all of the inputs
+	for i in tx.inputs:
+		if i["address"] != tx.address:
+			return False 
+
+	# Verify that the wallet of
+	# the tx has signed the tx
+	# address, message, signature
+	if not wallet.verifySignature(tx.address, tx.hash(), tx.signature):
+		return False
+
+	# Verify that the wallet has
+	# sufficient funds
 	totalIn = calculateInflow(chain, tx)
 	totalOut = calculateOutflow(tx)
 
