@@ -17,6 +17,8 @@ To initialize a node, run the python script...
 python coil.py
 ```
 
+Next, go in to `coil.py` and uncomment like 23, and then comment lines 19 & 20. These lines are only available to the creator, who has the `wallet.pem` file (mainly for testing purposes).
+
 ## Dependencies
 * Python 3.6 (only tested with Ubuntu 17.10)
 * aiohttp

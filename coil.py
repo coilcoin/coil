@@ -16,7 +16,12 @@ from wallet import Wallet, exportWallet
 from tx import Transaction
 from node import Node
 
-node_creator = Wallet()
+pk = open("../wallet.pem", "r").read().strip()
+node_creator = Wallet(importKey=pk)
+
+# Uncomment line below not creator
+# node_creator = Wallet()
+
 node = Node(node_creator.address)
 
 def respond(message):
