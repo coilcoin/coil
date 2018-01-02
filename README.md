@@ -5,11 +5,8 @@ Coilcoin is a primitive (**incomplete**) Python-based cryptocurrency intended fo
 ## Pending Tasks
 The following tasks must be completed before Coil is a fully functioning cryptocurrency.
 
-* Merkle Tree Implementation (algorithm)
 * Concensus Algorithm
-* Wallets stored in session
-* Mining Tool
-* Wallet signed transactions
+* Separate Wallet
 
 ## Getting Started
 To initialize a node, run the python script...
