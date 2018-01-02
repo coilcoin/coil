@@ -55,6 +55,8 @@ async def last_block_hash(request):
 
 async def resolve(request):
 	""" Resolve conflicts in chain with peers """
+	# Visit all peers, collect the length of chains
+	# 
 	return respond(node.getChain())
 
 async def new_wallet(request):

@@ -1,5 +1,7 @@
 # node.py
 import requests
+import json
+import sys
 
 from urllib.parse import urlparse
 from tx import Transaction, Coinbase, createInput
@@ -66,8 +68,12 @@ class Node(object):
 		self.peers = set()
 		self.chain = None
 		self.host = "0.0.0.0"
-		self.port = 1337
 		self.creator = creator
+
+		if len(sys.argv) > 1:
+			self.port = int(sys.argv[1])
+		else:
+			self.port = 1337
 
 		# Read Peers
 		peers = open("peers.txt", "r").readlines()
@@ -89,7 +95,16 @@ class Node(object):
 		self.peers.add(parsed_url.netloc)
 
 	def getChain(self):
-		return self.chain.displayJSON()
+		fullChain = { "blockHeight": self.chain.blockHeight, "chain": self.chain.displayDict() }
+		return json.dumps(fullChain)
 
 	def resolveChain(self):
-		pass
+		maxHeights = {}
+
+		for node in self.peers:
+			response = requests.get("http://" + node + "/chain").json()
+			maxHeights[node] = response["blockHeight"]
+
+		# Replace chain
+		response = requests.get("http://" + max(maxHeights) + "/chain").json()
+		self.chain = chainFromResponse(response["chain"])

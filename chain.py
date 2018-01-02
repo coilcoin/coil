@@ -148,9 +148,7 @@ class Chain(object):
 		else:
 			return False
 
-	def displayJSON(self):
-		import json
-
+	def displayDict(self):
 		newchain = []
 		for block in self.chain:
 			newblock = block.__dict__
@@ -168,4 +166,8 @@ class Chain(object):
 			newblock["transactions"] = newtransactions
 			newchain.append(newblock)
 
-		return json.dumps(newchain)
+		return newchain
+	
+	def displayJSON(self):
+		import json
+		return json.dumps(self.displayJSON(newchain))
