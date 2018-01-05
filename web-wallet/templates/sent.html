@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta id="privateKey" data="{{ privateKey }}">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Coil Wallet</title>
+	<style>
+		:root {
+			font-size: 18px;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont,
+                    'avenir next', avenir,
+                    helvetica, 'helvetica neue',
+                    ubuntu,
+                    roboto, noto,
+                    'segoe ui', arial,
+                    sans-serif;
+
+			font-weight: lighter;
+			font-size: 1rem;
+			color: #111;
+			line-height: 1.6;
+		}
+
+		#wrapper {
+			max-width: 600px;
+			margin: 4em auto;
+		}
+
+		a {
+			color: blue;
+		}
+	</style>
+</head>
+<body>
+	<div id="wrapper">
+		{% if success %}
+		<div align="center">
+			<h2>{{ message }}</h2>
+			<a href="/">Return</a>
+		</div>
+		{% else %}
+		<div align="center">
+			<h2 style="color: red;">{{ message }}</h2>
+			<a href="/">Return</a>
+		</div>
+		{% endif %}
+	</div>
+</body>
+</html>

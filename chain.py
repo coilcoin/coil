@@ -68,7 +68,7 @@ def verifyTransaction(chain, tx):
 	# Verify that the wallet of
 	# the tx has signed the tx
 	# address, message, signature
-	if not wallet.verifySignature(tx.address, tx.hash(), tx.signature):
+	if not wallet.verifySignature(tx.pubkey, tx.hash(), tx.signature):
 		return False
 
 	# Verify that the wallet has
@@ -120,7 +120,7 @@ class Chain(object):
 		else:
 			return False
 
-	def appendBlock(self, minerAddress, prevBlockHash, nonce, transactionHashes):
+	def appendBlock(self, minerAddress, minerPubKey, prevBlockHash, nonce, transactionHashes):
 		if verifyBlock(self.chain, prevBlockHash, nonce, transactionHashes):
 			# Select transactions
 			txs = []
@@ -130,7 +130,7 @@ class Chain(object):
 						txs.append(tr)
 
 			# Create Coinbase for Miner
-			txs.append(tx.Coinbase(minerAddress))
+			txs.append(tx.Coinbase(minerAddress, minerPubKey))
 
 			# Generate Merkle Root
 			txs_dict = [ str(t.__dict__) for t in txs ]

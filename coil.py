@@ -8,6 +8,7 @@ __version__ = "0.1.0"
 import json
 import base64
 from cryptography import fernet
+from Crypto.PublicKey import RSA
 
 import aiohttp_cors
 from aiohttp import web
@@ -26,16 +27,29 @@ node_creator = Wallet()
 
 node = Node(node_creator.address)
 
+# Write out details for use in wallet
+f = open("wallet.pem", "wb")
+f.write(node_creator.importKey)
+f.close()
+
+f = open("address", "w")
+f.write(str(node_creator.address))
+f.close()
+
+f = open("pubkey", "w")
+f.write(str(node_creator.publicKey.exportKey()))
+f.close()
+
 def respond(message):
 	txt = json.dumps({ "message": message })
-	return web.Response(text=txt, content_type="application/json", headers={"Access-Control-Allow-Origin": "http://localhost:5000"}) 
+	return web.Response(text=txt, content_type="application/json") 
 
 def respondJSON(message):
 	txt = json.dumps(message)
-	return web.Response(text=txt, content_type="application/json", headers={"Access-Control-Allow-Origin": "http://localhost:5000"})
+	return web.Response(text=txt, content_type="application/json")
 
 def respondPlain(message):
-	return web.Response(text=message, content_type="application/json", headers={"Access-Control-Allow-Origin": "http://localhost:5000"})
+	return web.Response(text=message, content_type="application/json")
 
 # Routes
 async def index(request):
@@ -58,13 +72,15 @@ async def balance(request):
 
 	data = await request.post()
 	address = data["address"]
-
+	
 	if "address" in data:
 		balance = 0
 		for block in node.chain.chain:
 			for tx in block.transactions:
-				print(tx["address"])
-				print(address)
+				# This is annoying. Must fix
+				if type(tx).__name__ != "dict":
+					tx = tx.__dict__
+
 				if tx["address"] == address:
 					for o in tx["outputs"]:
 						if not tx["inputs"] == []: 
@@ -139,9 +155,9 @@ async def new_transaction(request):
 	{ wallet: "key", inputs: [  ], outputs: [ ] }
 	"""
 
-	data = await request.post()
+	data = await request.json()
 
-	if "wallet" in data and "inputs" in data and "outputs" in data:
+	if 'wallet' in data and 'inputs' in data and 'outputs' in data:
 		# Retrieve Wallet
 		inputs = data["inputs"]
 		outputs = data["outputs"]
@@ -151,7 +167,7 @@ async def new_transaction(request):
 		# wallet_export = session["wallet"]
 		wallet = Wallet(importKey=label)
 		if wallet:
-			tx = Transaction(wallet.address, inputs, outputs)
+			tx = Transaction(wallet.address, inputs, outputs, wallet.publicKey)
 			tx.sign(wallet.sign(tx.hash()))
 
 			success = node.chain.appendTransaction(tx)
@@ -180,14 +196,18 @@ async def mine_block(request):
 	"""
 	data = await request.post()
 
-	if "minerAddress" in data and "previousBlockHash" in data and \
+	if "minerAddress" in data and "minerPubKey" in data \
+		and "previousBlockHash" in data and \
 		"nonce" in data and "transactionHashes" in data:
 
 		address = data["minerAddress"]
+		minerPubKey = data["minerPubKey"]
 		previousBlockHash = data["previousBlockHash"]
 		nonce = data["nonce"]
 		transactionHashes = data["transactionHashes"]
-		success = node.chain.appendBlock(address, previousBlockHash, nonce, transactionHashes)
+
+		pubkey = RSA.importKey(minerPubKey)
+		success = node.chain.appendBlock(address, minerPubKey, previousBlockHash, nonce, transactionHashes)
 
 		# RESOLVE CHAIN
 

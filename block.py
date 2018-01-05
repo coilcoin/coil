@@ -12,10 +12,7 @@ class Block(object):
         self.nonce = nonce
         self.transactions = txs
         self.merkleRoot = merkle
-
-    @property
-    def time(self):
-        return time.time()
+        self.timestamp = time.time()
 
     def hash(self):
         return chash.doubleHashEncodeJSON(self.__dict__)
@@ -40,7 +37,7 @@ class Genesis(Block):
     def __init__(self, creator):
         # ICO of 120 coins
         txs = [
-            tx.Coinbase(creator, amount=120)
+            tx.Coinbase(creator, None, amount=12000)
         ]
 
         txs_dict = [ str(t.__dict__) for t in txs ]

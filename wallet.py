@@ -12,10 +12,9 @@ def generateAddress(pubkey):
 	SPECIAL_NUMBER = key.activation_key
 	h1 = chash.doubleHashEncode(str(pubkey))
 	h2 = chash.doubleHashEncode(str(SPECIAL_NUMBER) + h1)
-	return h2[:25]
+	return h2[:26]
 
-def verifySignature(address, message, signature):
-    pubkey = RSA.importKey(binascii.unhexlify(address))
+def verifySignature(pubkey, message, signature):
     verifier = PKCS1_v1_5.new(pubkey)
     h = SHA.new(message.encode('utf8'))
     return verifier.verify(h, binascii.unhexlify(signature))

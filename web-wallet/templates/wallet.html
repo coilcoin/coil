@@ -40,6 +40,7 @@
 			font-size: 1rem;
 			margin: 0.5em 0;
 			min-width: 120px;
+			outline: none !important;
 		}
 
 		.inp {
@@ -53,22 +54,32 @@
 		#button {
 			cursor: pointer;
 		}
+
+		h3 {
+			font-size: 1.2rem;
+			font-weight: lighter !important;
+		}
+
 	</style>
 </head>
 <body>
 	<div id="wrapper">
 		<h1>Wallet</h1>
-		<h2>Your address: <span id="address">{{ address }}</span></h2>
-		<h2>Your balance: <span id="balance">{{ address }}</span></h2>
 
+		<div id="qrcode"></div>
+
+		<h3>Your address: <span id="address">{{ address }}</span></h3>
+		<h3>Your balance: <span id="balance">{{ balance }} COL</span></h3>
 		<hr>
 
 		<h2>New Transaction</h2>
 
 		<div id="new-transaction">
-			<input class="inp" type="text" placeholder="Recipient's Address" id="recipient-address"><br>
-			<input class="inp" type="number" value="1"><br>
-			<input type="submit" value="Send" id="button">
+			<form action="/send" method="POST">
+				<input spellcheck="false" class="inp" type="text" placeholder="Recipient's Address" id="recipient-address" name="recipient"><br>
+				<input class="inp" type="number" value="0.0000" step="0.00001" min="0.00001" max="1000" name="amount"><br>
+				<input type="submit" value="Send" id="button">
+			</form>
 		</div>
 
 		<hr>
@@ -79,34 +90,24 @@
 		</div>
 	</div>
 	<script src="/static/jquery.min.js"></script>
+	<script src="/static/qrcode.min.js"></script>
 	<script>
-		var address = "localhost";
-		var port = 1337;
-		var wallet = null;
-		var balance = 0;
-
-		function getWallet() {
-			$.get("http://" + address + ":" + port.toString() + "/wallet/new", function(data) {
-				// send privateKey to server 
-				var privateKey = data["privateKey"]["importKey"];
-				console.log(privateKey)
-			});
-		}
-
-		function getBalance() {
-			var b = 0;
-			$.post("http://" + address + ":" + port.toString() + "/balance",{ address: address }, function(data){
-				b = data["balance"];
-			});
-			return b;
-		}
-
-		$(document).ready(function() {
-			wallet = getWallet();
-			balance = getBalance();
-
-			$("#balance").html(balance);
+		var qrcode = new QRCode(document.getElementById("qrcode"), {
+		    text: $("#address").html(),
+		    width: 128,
+		    height: 128,
+		    colorDark : "#000000",
+		    colorLight : "#ffffff",
+		    correctLevel : QRCode.CorrectLevel.H
 		});
+
+		// setInterval(function() {
+		// 	$.post("http://localhost:1337/balance", { "address": $("#address").html() },
+		// 	function(data) {
+		// 		$("#balance").html(data["balance"]);
+		// 	});
+		// }, 1000);
+		
 	</script>
 </body>
 </html>
