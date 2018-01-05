@@ -107,4 +107,5 @@ class Node(object):
 
 		# Replace chain
 		response = requests.get("http://" + max(maxHeights) + "/chain").json()
+		print(response["chain"])
 		self.chain = chainFromResponse(response["chain"])

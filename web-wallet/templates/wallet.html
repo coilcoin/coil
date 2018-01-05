@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta id="privateKey" data="{{ privateKey }}">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Coil Wallet</title>
+	<style>
+		:root {
+			font-size: 18px;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont,
+                    'avenir next', avenir,
+                    helvetica, 'helvetica neue',
+                    ubuntu,
+                    roboto, noto,
+                    'segoe ui', arial,
+                    sans-serif;
+
+			font-weight: lighter;
+			font-size: 1rem;
+			color: #111;
+			line-height: 1.6;
+		}
+
+		#wrapper {
+			max-width: 600px;
+			margin: 4em auto;
+		}
+
+		#address {
+			color: blue;
+		}
+
+		input {
+			border: 5px solid #222;
+			padding: 0.5em;
+			font-size: 1rem;
+			margin: 0.5em 0;
+			min-width: 120px;
+		}
+
+		.inp {
+			width: 15em;
+		}
+
+		input:active {
+			outline: none;
+		}
+
+		#button {
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<div id="wrapper">
+		<h1>Wallet</h1>
+		<h2>Your address: <span id="address">{{ address }}</span></h2>
+		<h2>Your balance: <span id="balance">{{ address }}</span></h2>
+
+		<hr>
+
+		<h2>New Transaction</h2>
+
+		<div id="new-transaction">
+			<input class="inp" type="text" placeholder="Recipient's Address" id="recipient-address"><br>
+			<input class="inp" type="number" value="1"><br>
+			<input type="submit" value="Send" id="button">
+		</div>
+
+		<hr>
+
+		<h2>History</h2>
+		<div id="old-transactions">
+
+		</div>
+	</div>
+	<script src="/static/jquery.min.js"></script>
+	<script>
+		var address = "localhost";
+		var port = 1337;
+		var wallet = null;
+		var balance = 0;
+
+		function getWallet() {
+			$.get("http://" + address + ":" + port.toString() + "/wallet/new", function(data) {
+				// send privateKey to server 
+				var privateKey = data["privateKey"]["importKey"];
+				console.log(privateKey)
+			});
+		}
+
+		function getBalance() {
+			var b = 0;
+			$.post("http://" + address + ":" + port.toString() + "/balance",{ address: address }, function(data){
+				b = data["balance"];
+			});
+			return b;
+		}
+
+		$(document).ready(function() {
+			wallet = getWallet();
+			balance = getBalance();
+
+			$("#balance").html(balance);
+		});
+	</script>
+</body>
+</html>

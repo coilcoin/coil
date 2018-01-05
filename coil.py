@@ -8,6 +8,8 @@ __version__ = "0.1.0"
 import json
 import base64
 from cryptography import fernet
+
+import aiohttp_cors
 from aiohttp import web
 from aiohttp_session import setup, get_session, session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
@@ -26,14 +28,14 @@ node = Node(node_creator.address)
 
 def respond(message):
 	txt = json.dumps({ "message": message })
-	return web.Response(text=txt, content_type="application/json") 
+	return web.Response(text=txt, content_type="application/json", headers={"Access-Control-Allow-Origin": "http://localhost:5000"}) 
 
 def respondJSON(message):
 	txt = json.dumps(message)
-	return web.Response(text=txt, content_type="application/json")
+	return web.Response(text=txt, content_type="application/json", headers={"Access-Control-Allow-Origin": "http://localhost:5000"})
 
 def respondPlain(message):
-	return web.Response(text=message, content_type="application/json")
+	return web.Response(text=message, content_type="application/json", headers={"Access-Control-Allow-Origin": "http://localhost:5000"})
 
 # Routes
 async def index(request):
@@ -48,6 +50,35 @@ async def block(request):
 	""" Return JSON object of last block"""
 	lastBlock = node.chain.lastBlock
 	return respondPlain(lastBlock.json())
+
+async def balance(request):
+	""" Return balance for an address
+	{ address: <> }
+	"""
+
+	data = await request.post()
+	address = data["address"]
+
+	if "address" in data:
+		balance = 0
+		for block in node.chain.chain:
+			for tx in block.transactions:
+				print(tx["address"])
+				print(address)
+				if tx["address"] == address:
+					for o in tx["outputs"]:
+						if not tx["inputs"] == []: 
+							balance -= o["amount"]
+
+				for o in tx["outputs"]:
+					if o["address"] == address:
+						# Ignore Coinbase
+						if tx["inputs"] == []:
+							balance += o["amount"]
+
+		return respondJSON({"address": address, "balance": balance})
+	else:
+		return respond("Invalid Request Data")
 
 async def last_block_hash(request):
 	""" Returns hash of last block"""
@@ -67,16 +98,13 @@ async def new_wallet(request):
 	{ importWallet: true, privateKey: "[blah]", label: "mywallet" }
 
 	or...
-	{ importWallet: false, label: "mywallet" }
+	{ importWallet: false }
 	"""
 
 	data = await request.post()
 	session = await get_session(request)
 
-	if not "wallets" in session:
-		session["wallets"] = {}
-
-	if "importWallet" in data and "label" in data:
+	if "importWallet" in data:
 		label = data["label"]
 		wallet = None
 		if data["importWallet"] == "true":
@@ -85,53 +113,33 @@ async def new_wallet(request):
 			wallet = Wallet()
 
 		# Store wallet in wallet bank
-		session["wallets"][label] = exportWallet(wallet)
+		session["wallet"] = exportWallet(wallet)
 
 		return respond(f"Successfully created wallet '{label}'")
 
 	else:
-		return respond("Invalid request data got ono ")
+		return respond("Invalid request data")
 
 async def new_wallet_get(request):
 	"""
 	Handle Random Wallet
 	"""
 	session = await get_session(request)
-	label = request.match_info["label"]
-
-	if not "wallets" in session:
-		session["wallets"] = {}
-
 	wallet = Wallet()
 
-	# Store wallet in wallet bank
-	session["wallets"][label] = exportWallet(wallet)
+	session["wallet"] = exportWallet(wallet)
 
-	return respond(f"Successfully created wallet '{label}'")
-
-async def get_wallet(request):
-	""" Get wallet address (/wallet/label) """
-	session = await get_session(request)
-
-	label = request.match_info["label"]
-
-	if label in session["wallets"]:
-		wallet = Wallet(importKey=session["wallets"][label]["importKey"])
-		return respondJSON({ "label": label, "address": wallet.address })
-	else:
-		return respond("Undefined wallet label")
-
+	return respondJSON({"message": "Successfully created wallet", "privateKey": session["wallet"]["importKey"], "address": wallet.address})
 
 async def new_transaction(request):
 	"""
 	Process a new transaction
 
 	expects...
-	{ wallet: "<label>", inputs: [  ], outputs: [ ] }
+	{ wallet: "key", inputs: [  ], outputs: [ ] }
 	"""
 
 	data = await request.post()
-	session = await get_session(request)
 
 	if "wallet" in data and "inputs" in data and "outputs" in data:
 		# Retrieve Wallet
@@ -140,8 +148,8 @@ async def new_transaction(request):
 		label = data["wallet"]
 
 		# Fetch wallet
-		wallet_export = session["wallets"][label]
-		wallet = Wallet(importKey=wallet_export["importKey"])
+		# wallet_export = session["wallet"]
+		wallet = Wallet(importKey=label)
 		if wallet:
 			tx = Transaction(wallet.address, inputs, outputs)
 			tx.sign(wallet.sign(tx.hash()))
@@ -149,7 +157,7 @@ async def new_transaction(request):
 			success = node.chain.appendTransaction(tx)
 
 			if success:
-				return respond("Transaction Successful")
+				return respondJSON({"message": "Transaction Successful", "blockHash": node.chain.lastBlock.hash() } )
 			else:
 				return respond("Transaction Failed")
 		else:
@@ -181,6 +189,8 @@ async def mine_block(request):
 		transactionHashes = data["transactionHashes"]
 		success = node.chain.appendBlock(address, previousBlockHash, nonce, transactionHashes)
 
+		# RESOLVE CHAIN
+
 		if success:
 			return respond("Succesfully mine a block")
 		else:
@@ -199,11 +209,11 @@ def make_app():
 	app.router.add_get("/chain/resolve", resolve)
 	app.router.add_get("/block", block)
 	app.router.add_get("/block/hash", last_block_hash)
-	app.router.add_post("/wallet/new", new_wallet)
-	app.router.add_get("/wallet/new/{label}", new_wallet_get)
-	app.router.add_get("/wallet/{label}", get_wallet)
+	app.router.add_get("/wallet/new", new_wallet_get)
+	app.router.add_post("/wallet", new_wallet)
 	app.router.add_post("/transaction/new", new_transaction)
 	app.router.add_post("/mine", mine_block)
+	app.router.add_post("/balance", balance)
 
 	return app
 
