@@ -10,7 +10,6 @@ import base64
 from cryptography import fernet
 from Crypto.PublicKey import RSA
 
-import aiohttp_cors
 from aiohttp import web
 from aiohttp_session import setup, get_session, session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage

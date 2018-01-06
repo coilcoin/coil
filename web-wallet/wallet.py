@@ -30,7 +30,7 @@ def loadHistory():
 
 	for line in lines:
 		line = [ l.strip() for l in line.split(",") ]
-		session["history"]["inputs"].append({
+		session["inputs"].append({
 			"amount": line[0],
 			"from": line[1],
 			"time": line[2],
@@ -45,7 +45,7 @@ def loadHistory():
 
 	for line in lines:
 		line = [ l.strip() for l in line.split(",") ]
-		session["history"]["outputs"].append({
+		session["outputs"].append({
 			"amount": line[0],
 			"to": line[1],
 			"time": line[2]
@@ -112,8 +112,11 @@ def index():
 			return "Node is not online."
 
 	else:
-		# Load wallet
-		loadHistory()
+		# If history is not present, write history
+		if not "history_inputs.csv" in os.listdir(WALLET_FOLDER):
+			writeHistory()
+		else:
+			loadHistory()
 
 		with open(WALLET_FOLDER + "/wallet.pem", "r") as f:
 			session["private_key"] = f.read().strip()
@@ -198,3 +201,6 @@ def send():
 		
 	else:
 		return redirect("/")
+
+if __name__ == "__main__":
+    app.run(debug=True)
