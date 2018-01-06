@@ -69,13 +69,14 @@ def verifyTransaction(chain, tx):
 
 	# Verify that a single wallet
 	# owns all of the inputs
-	for i in tx.inputs:
-		if i["address"] != tx.address:
-			return 2
+	# for i in tx.inputs:
+	# 	if i["address"] != tx.address:
+	# 		return 2
 
 	# Verify that the wallet of
 	# the tx has signed the tx
 	# address, message, signature
+
 	if not wallet.verifySignature(tx.pubkey, tx.hash(), tx.signature):
 		return 3
 

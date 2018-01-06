@@ -5,8 +5,11 @@ import config
 import requests
 import json
 import os
-
+import time
 import hashlib
+import struct
+
+from collections import OrderedDict
 
 def doubleHash(input):
     return hashlib.sha256(hashlib.sha256(input).digest()).hexdigest()
@@ -23,17 +26,28 @@ app.secret_key = "somethingrandom"
 WALLET_FOLDER = os.path.join(os.getcwd(), "wallet")
 
 def loadHistory():
+	"""
+	Returns dict { "inputs": [], "outputs": [] }
+	"""
+
+	history = {
+		"inputs": [],
+		"outputs": []
+	}
+
 	# INPUTS: Example line
 	# amount, from, time, previousBlockHash, blockIndex
 	f = open(WALLET_FOLDER + "/history_inputs.csv", "r")
 	lines = f.readlines()
 
 	for line in lines:
-		line = [ l.strip() for l in line.split(",") ]
-		session["inputs"].append({
+		line = [l.strip() for l in line.split(",")]
+		app.logger.info(line)
+
+		history["inputs"].append({
 			"amount": line[0],
 			"from": line[1],
-			"time": line[2],
+			"time": float(line[2]),
 			"previousBlockHash": line[3],
 			"blockIndex": line[4]
 		})
@@ -44,42 +58,52 @@ def loadHistory():
 	lines = f.readlines()
 
 	for line in lines:
+		app.logger.info(line)
 		line = [ l.strip() for l in line.split(",") ]
-		session["outputs"].append({
-			"amount": line[0],
-			"to": line[1],
-			"time": line[2]
+
+		history["outputs"].append({
+			"to": line[0],
+			"amount": line[1],
+			"time": float(line[2])
 		})
 
+	return history
+
 def writeHistory():
-	# INPUTS: Example line
-	# amount, from, time, previousBlockHash, blockIndex
-	f = open(WALLET_FOLDER + "/history_inputs.csv", "w")
+	# Before writing history, check is the history
+	# already on disk?
+	history = loadHistory()
 
-	string = ""
-	for i in session["inputs"]:
-		for ii in i:
-			string += str(i[ii]) + ","
-		string += "\n"
+	if session["inputs"] != history["inputs"]:
+		# INPUTS: Example line
+		# amount, from, time, previousBlockHash, blockIndex
+		f = open(WALLET_FOLDER + "/history_inputs.csv", "w")
 
-	f.write(string)
-	f.close()
+		string = ""
+		for i in session["inputs"]:
+			string = ",".join(list([ str(ii) for ii in i.values()]))
+			print(string)
+			string += "\n"
 
-	# OUTPUTS: Example line
-	# amount, to, time
-	f = open(WALLET_FOLDER + "/history_outputs.csv", "w")
-	
-	string = ""
-	for output in session["outputs"]:
-		for i in output:
-			string += str(i[output]) + ","
-		string += "\n"
+		f.write(string)
+		f.close()
 
-	f.write(string)
-	f.close()
+	if session["outputs"] != history["outputs"]:
+		# OUTPUTS: Example line
+		# amount, to, time
+		f = open(WALLET_FOLDER + "/history_outputs.csv", "w")
+		
+		string = ""
+		for o in session["outputs"]:
+			string = ",".join(list([ str(i) for i in o.values()]))
+			string += "\n"
+
+		f.write(string)
+		f.close()
 
 @app.route("/")
 def index():
+	# Write files if they don't exist
 	# Initialize Wallet Space
 	if not "inputs" in session:
 		session["inputs"] = []
@@ -113,10 +137,19 @@ def index():
 
 	else:
 		# If history is not present, write history
-		if not "history_inputs.csv" in os.listdir(WALLET_FOLDER):
-			writeHistory()
+		if not "history_inputs.csv" in os.listdir(WALLET_FOLDER) \
+			and not "history_outputs.csv" in os.listdir(WALLET_FOLDER):
+			f = open(WALLET_FOLDER + "/history_inputs.csv", "w")
+			f.write("")
+			f.close()
+
+			f = open(WALLET_FOLDER + "/history_outputs.csv", "w")
+			f.write("")
+			f.close()
 		else:
-			loadHistory()
+			history = loadHistory()
+			session["inputs"] = history["inputs"]
+			session["outputs"] = history["outputs"]
 
 		with open(WALLET_FOLDER + "/wallet.pem", "r") as f:
 			session["private_key"] = f.read().strip()
@@ -154,9 +187,22 @@ def index():
 	r = requests.post(config.node_address + "/balance", data={'address': session["address"]}).json()
 	session["balance"] = r["balance"]
 
-	app.logger.info(session["inputs"])
+	# Load history
+	history = loadHistory()
+	session["inputs"] = history["inputs"]
+	session["outputs"] = history["outputs"]
 
-	return render_template("wallet.html", address=session["address"], balance=session["balance"])
+	# Combine inputs and outputs
+	history = []
+	for i in session["inputs"]:
+		history.append(i)
+
+	for o in session["outputs"]:
+		history.append(o)
+
+	# sorted_history = sorted(history, key=lambda k: k['time'])
+
+	return render_template("wallet.html", address=session["address"], balance=session["balance"], history=history)
 
 @app.route("/send", methods=["POST", "GET"])
 def send():
@@ -193,14 +239,24 @@ def send():
 		success = "blockHash" in r 
 
 		# If all is good, add transaction to history
-
-		# { wallet: "key", inputs: [  ], outputs: [ ] }
+		if success:
+			output["time"] = time.time()
+			session["outputs"].append(output)
+			writeHistory()
 
 		return render_template("sent.html", message=r["message"], success=success)
 
-		
 	else:
 		return redirect("/")
+
+@app.route("/transaction")
+def transaction():
+	return render_template("transaction.html")
+
+@app.route("/flush")
+def flush():
+	session.clear()
+	return "Cleared Session."
 
 if __name__ == "__main__":
     app.run(debug=True)
