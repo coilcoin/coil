@@ -42,7 +42,6 @@ If you look into the source code, you may be surprised by some "design" decision
 ## Dependencies
 * Python 3.6 (only tested with Ubuntu 17.10)
 * aiohttp
-* aiohttp_session
 * requests
 
 Optional

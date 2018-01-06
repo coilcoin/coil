@@ -9,10 +9,7 @@ import json
 import base64
 from cryptography import fernet
 from Crypto.PublicKey import RSA
-
 from aiohttp import web
-from aiohttp_session import setup, get_session, session_middleware
-from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from wallet import Wallet, exportWallet
 from tx import Transaction
@@ -108,43 +105,11 @@ async def resolve(request):
 async def new_wallet(request):
 	"""
 	Handle Random Wallet
-
-	request...
-	{ importWallet: true, privateKey: "[blah]", label: "mywallet" }
-
-	or...
-	{ importWallet: false }
 	"""
-
-	data = await request.post()
-	session = await get_session(request)
-
-	if "importWallet" in data:
-		label = data["label"]
-		wallet = None
-		if data["importWallet"] == "true":
-			wallet = Wallet(importKey=data["privateKey"])
-		else:
-			wallet = Wallet()
-
-		# Store wallet in wallet bank
-		session["wallet"] = exportWallet(wallet)
-
-		return respond(f"Successfully created wallet '{label}'")
-
-	else:
-		return respond("Invalid request data")
-
-async def new_wallet_get(request):
-	"""
-	Handle Random Wallet
-	"""
-	session = await get_session(request)
 	wallet = Wallet()
+	private_key = exportWallet(wallet)["importKey"]
 
-	session["wallet"] = exportWallet(wallet)
-
-	return respondJSON({"message": "Successfully created wallet", "privateKey": session["wallet"]["importKey"], "address": wallet.address})
+	return respondJSON({"message": "Successfully created wallet", "privateKey": private_key, "address": wallet.address})
 
 async def new_transaction(request):
 	"""
@@ -168,8 +133,6 @@ async def new_transaction(request):
 		outputs = data["outputs"]
 		label = data["wallet"]
 
-		# Fetch wallet
-		# wallet_export = session["wallet"]
 		wallet = Wallet(importKey=label)
 		if wallet:
 			tx = Transaction(wallet.address, inputs, outputs, wallet.publicKey)
@@ -240,8 +203,7 @@ def make_app():
 	app.router.add_get("/chain/resolve", resolve)
 	app.router.add_get("/block", block)
 	app.router.add_get("/block/hash", last_block_hash)
-	app.router.add_get("/wallet/new", new_wallet_get)
-	app.router.add_post("/wallet", new_wallet)
+	app.router.add_get("/wallet", new_wallet)
 	app.router.add_post("/transaction/new", new_transaction)
 	app.router.add_post("/mine", mine_block)
 	app.router.add_post("/balance", balance)
