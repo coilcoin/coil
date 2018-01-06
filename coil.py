@@ -153,6 +153,12 @@ async def new_transaction(request):
 
 	expects...
 	{ wallet: "key", inputs: [  ], outputs: [ ] }
+
+	Transaction codes
+	1 .. Successful Transaction
+	2 .. Corrupt inputs.
+	3 .. Corrupt signature.
+	4 .. Insufficient funds.
 	"""
 
 	data = await request.json()
@@ -170,10 +176,16 @@ async def new_transaction(request):
 			tx = Transaction(wallet.address, inputs, outputs, wallet.publicKey)
 			tx.sign(wallet.sign(tx.hash()))
 
-			success = node.chain.appendTransaction(tx)
+			code = node.chain.appendTransaction(tx)
 
-			if success:
+			if code == 1:
 				return respondJSON({"message": "Transaction Successful", "blockHash": node.chain.lastBlock.hash() } )
+			elif code == 2:
+				return respond("Transaction Failed. Corrupt Inputs")
+			elif code == 3:
+				return respond("Transaction Failed. Corrupt Signature")
+			elif code == 4:
+				return respond("Transaction Failed. Insufficient Funds")
 			else:
 				return respond("Transaction Failed")
 		else:

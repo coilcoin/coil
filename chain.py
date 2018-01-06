@@ -59,17 +59,25 @@ def calculateOutflow(tx):
 	return totalOut
 
 def verifyTransaction(chain, tx):
+	"""
+	Transaction codes
+	1 .. Successful Transaction
+	2 .. Corrupt inputs.
+	3 .. Corrupt signature.
+	4 .. Insufficient funds.
+	"""
+
 	# Verify that a single wallet
 	# owns all of the inputs
 	for i in tx.inputs:
 		if i["address"] != tx.address:
-			return False 
+			return 2
 
 	# Verify that the wallet of
 	# the tx has signed the tx
 	# address, message, signature
 	if not wallet.verifySignature(tx.pubkey, tx.hash(), tx.signature):
-		return False
+		return 3
 
 	# Verify that the wallet has
 	# sufficient funds
@@ -79,9 +87,16 @@ def verifyTransaction(chain, tx):
 	if totalIn:
 		# If funds are sufficient
 		if totalIn >= totalOut:
-			return True
+			return 1
 
-	return False
+	return 4
+
+def verifyCoinbase(chain, tx):
+	# Check coinbase is 50 coins
+	if tx.outputs["amount"] == 50:
+		return True
+	else:
+		return False
 
 def verifyBlock(chain, prevBlockHash, nonce, transactionHashes):
 	# Verify Proof of Work
@@ -114,11 +129,11 @@ class Chain(object):
 		return self.chain[-1]
 
 	def appendTransaction(self, transaction):
-		if verifyTransaction(self.chain, transaction):
+		transcode = verifyTransaction(self.chain, transaction)
+		if transcode == 1:
 			self.mempool.add(transaction)
-			return True
-		else:
-			return False
+		
+		return transcode
 
 	def appendBlock(self, minerAddress, minerPubKey, prevBlockHash, nonce, transactionHashes):
 		if verifyBlock(self.chain, prevBlockHash, nonce, transactionHashes):
@@ -130,7 +145,13 @@ class Chain(object):
 						txs.append(tr)
 
 			# Create Coinbase for Miner
-			txs.append(tx.Coinbase(minerAddress, minerPubKey))
+			cbase = tx.Coinbase(minerAddress, minerPubKey)
+
+			# Verify Coinbase
+			if verifyCoinbase(cbase):
+				txs.append(cbase)
+			else:
+				return False
 
 			# Generate Merkle Root
 			txs_dict = [ str(t.__dict__) for t in txs ]
