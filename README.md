@@ -1,6 +1,6 @@
 # Coil
 
-Coilcoin is a primitive (**incomplete**) Python-based cryptocurrency intended for educational purposes.
+Coilcoin is an experimental micro cryptocurrency written in Python. It is by no means secure; much of the validation has not yet been implemented.
 
 ## Pending Tasks
 The following tasks must be completed before Coil is a fully functioning cryptocurrency.
