@@ -2,12 +2,6 @@
 
 Coil is an experimental micro cryptocurrency written in Python. It is by no means secure; much of the validation has not yet been implemented. *Coil* refers to the protocol and software, *Coilcoin* refers to the currency (COL).
 
-## Pending Tasks
-The following tasks must be completed before Coil is a fully functioning cryptocurrency.
-
-* Web Wallet is unfinished (history transactions not implemented)
-* Coinbases are not verified
-
 ## Getting Started
 To initialize a node, run the python script...
 ```bash
