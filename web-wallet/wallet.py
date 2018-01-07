@@ -9,7 +9,7 @@ import time
 import hashlib
 import struct
 
-from collections import OrderedDict
+from Crypto.PublicKey import RSA
 
 def doubleHash(input):
     return hashlib.sha256(hashlib.sha256(input).digest()).hexdigest()
@@ -115,9 +115,15 @@ def index():
 	if os.listdir(WALLET_FOLDER) == []:
 		try:
 			# Request a new wallet
-			r = requests.get(config.node_address + "/wallet/new").json()
+			r = requests.get(config.node_address + "/wallet").json()
 			session["private_key"] = r["privateKey"]
 			session["address"] = r["address"]
+
+			# Generate public key
+			pubkey = RSA.importKey(minerPubKey).publickey().exportKey()
+			f = open(WALLET_FOLDER + "/pubkey", "wb")
+			f.write(pubkey)
+			f.close()
 
 			# Export PEM file
 			f = open(WALLET_FOLDER + "/wallet.pem", "w")
@@ -240,8 +246,11 @@ def send():
 
 		# If all is good, add transaction to history
 		if success:
-			output["time"] = time.time()
-			session["outputs"].append(output)
+			session["outputs"].append({
+				"to": recipient,
+				"amount": float(amount),
+				"time": time.time()
+			})
 			writeHistory()
 
 		return render_template("sent.html", message=r["message"], success=success)

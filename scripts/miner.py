@@ -23,8 +23,8 @@ s = requests.Session()
 url = "http://localhost:1337"
 
 #address = s.get(url + "/wallet/new").json()["address"]
-address = 'bb696bae2f05df403051306d26'
-pubkey = b'-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCkQ5i+p35CjZeueJYG0lZ0VDY0\np8obVjsuSsczjyk38S+HWcmxn2nvPM4+Cq+4meQ+mMDTvMfboKEhrAoSKVkV1g0P\n3Rowmo9yw/bo3qthjLt+0qX3zNJXw3j67qMCfjcXMGPyXSEDMTAJjIQtgHYHxHtp\n11QpmcRde9lH7B6N/wIDAQAB\n-----END PUBLIC KEY-----'
+address = 'a09c0319327effbaed9219e85f'
+pubkey = b'-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCmKYDSYE32ZEHEbg5s5VJmF9Z5\n73kJiba89l45oHKYTE4hNAGC9Y7SdZgkU5TYlU8r3azaZrtK7j0mWRTLUjwlFU9U\nKCrKJpCiAwn3MWwh/eBol6XT2Cdcva2N2cY5L73zsjiMtbPBPZu9CVND4QCWImE5\nugJs+08EQEa7ZdQ4RwIDAQAB\n-----END PUBLIC KEY-----'
 last_hash = s.get(url + "/block/hash").json()["message"]
 
 nonce = 0

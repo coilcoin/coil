@@ -7,7 +7,6 @@ __version__ = "0.1.0"
 
 import json
 import base64
-from cryptography import fernet
 from Crypto.PublicKey import RSA
 from aiohttp import web
 
@@ -15,18 +14,18 @@ from wallet import Wallet, exportWallet
 from tx import Transaction
 from node import Node
 
-# pk = open("../wallet.pem", "r").read().strip()
-# node_creator = Wallet(importKey=pk)
+pk = open("web-wallet/wallet/wallet.pem", "r").read().strip()
+node_creator = Wallet(importKey=pk)
 
 # Uncomment line below not creator
-node_creator = Wallet()
+# node_creator = Wallet()
 
 node = Node(node_creator.address)
 
 # Write out details for use in wallet
-f = open("wallet.pem", "wb")
-f.write(node_creator.importKey)
-f.close()
+# f = open("wallet.pem", "wb")
+# f.write(node_creator.importKey)
+# f.close()
 
 f = open("address", "w")
 f.write(str(node_creator.address))
@@ -180,7 +179,6 @@ async def mine_block(request):
 		nonce = data["nonce"]
 		transactionHashes = data["transactionHashes"]
 
-		pubkey = RSA.importKey(minerPubKey)
 		success = node.chain.appendBlock(address, minerPubKey, previousBlockHash, nonce, transactionHashes)
 
 		# RESOLVE CHAIN
@@ -194,10 +192,6 @@ async def mine_block(request):
 
 def make_app():
 	app = web.Application()
-	fernet_key = fernet.Fernet.generate_key()
-	secret_key = base64.urlsafe_b64decode(fernet_key)
-	setup(app, EncryptedCookieStorage(secret_key))
-
 	app.router.add_get("/", index)
 	app.router.add_get("/chain", chain)
 	app.router.add_get("/chain/resolve", resolve)

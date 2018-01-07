@@ -36,6 +36,9 @@ def validProof(prevHash, nonce):
 	return result[:5] == "00000" and int(result, 16) % 5 == 0
 ```
 
+## Mining
+Coil comes with a built in miner. To run the miner, copy the pubkey and address of your wallet into the `scripts/miner.py` file on lines 26 & 27. Then run the python file.
+
 ## Notes from the Developer
 If you look into the source code, you may be surprised by some "design" decisions. Firstly, wallets (yes private keys) are stored by the server. This is purely for development. Once the node software is functioning, server-stored wallets will be removed and a seperate wallet program will be instated.
 
