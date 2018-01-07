@@ -149,7 +149,7 @@ class Chain(object):
 			cbase = tx.Coinbase(minerAddress, minerPubKey)
 
 			# Verify Coinbase
-			if verifyCoinbase(cbase):
+			if verifyCoinbase(chain, cbase):
 				txs.append(cbase)
 			else:
 				return False

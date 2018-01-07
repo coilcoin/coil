@@ -14,18 +14,20 @@ from wallet import Wallet, exportWallet
 from tx import Transaction
 from node import Node
 
-pk = open("web-wallet/wallet/wallet.pem", "r").read().strip()
-node_creator = Wallet(importKey=pk)
-
+################################################################
 # Uncomment line below not creator
-# node_creator = Wallet()
-
-node = Node(node_creator.address)
+node_creator = Wallet()
 
 # Write out details for use in wallet
-# f = open("wallet.pem", "wb")
-# f.write(node_creator.importKey)
-# f.close()
+f = open("wallet.pem", "wb")
+f.write(node_creator.importKey)
+f.close()
+################################################################
+# pk = open("web-wallet/wallet/wallet.pem", "r").read().strip()
+# node_creator = Wallet(importKey=pk)
+################################################################
+
+node = Node(node_creator.address)
 
 f = open("address", "w")
 f.write(str(node_creator.address))
