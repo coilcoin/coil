@@ -1,0 +1,19 @@
+Mon 08 Jan 2018 ====================================
+Just thought that since it may be a while until I
+can get back to development of the project, I should
+note down some major/minor changes that need to be
+implemented into the core.
+
+[ Bugs ]
+* Corrupt signature *according to error sytem, when
+  processing new transactions / mining blocks
+* Wallet on reload, appends coinbase to history
+  multiple times (atleast in session)
+  
+[ Wider issues ]
+* Concensus - testing needed
+* Verifying coinbase transactions
+* https://bitcoin.stackexchange.com/questions/41911/how-do-nodes-verify-that-a-block-has-been-solved-and-can-be-added-to-the-blockch
+
+[ Changes ]
+* Encode public keys
