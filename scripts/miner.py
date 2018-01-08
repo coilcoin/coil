@@ -23,8 +23,8 @@ s = requests.Session()
 url = "http://localhost:1337"
 
 #address = s.get(url + "/wallet/new").json()["address"]
-address = 'b3f568329dae5dfff4167471a9'
-pubkey = b'-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCxzvyOQjOOF/XjUqyey+HSz04X\nYAdnzPbS9OJI8P4nzHO0X+5Sx5NGXsJN7k0005hvA+d0r4JWJUcFyp5BPW5aAdoH\ndlP76zdoa2gmyBs4QUTQ0QQLal7eR1yHvUI2bzN2uSjxbImMWFtF1vxV+NitPTuh\nF0dP26u2xDbVJ/f57wIDAQAB\n-----END PUBLIC KEY-----'
+address = '59fc1b72be43d4e409cbbc2aa2'
+pubkey = b'-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCpcPyekvm0ZbL5WQ9TXKo3Zkb6\nqp1+ghqdAAjcG3E6t1yQd5/nJG1GyKIbyhDdm4iYJB52qntR/sJgei9ydWe+NMFF\nsfG+TqpZbpK9Kdb65iwj3pDBLoF6vUN6zkyfwACV2lISmslLWq1ms8KorPVFwcop\nMn/h7TF2ObXreeQg4QIDAQAB\n-----END PUBLIC KEY-----'
 last_hash = s.get(url + "/block/hash").json()["message"]
 
 nonce = 0

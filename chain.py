@@ -94,7 +94,7 @@ def verifyTransaction(chain, tx):
 
 def verifyCoinbase(chain, tx):
 	# Check coinbase is 50 coins
-	if tx.outputs["amount"] == 50:
+	if tx.outputs[0]["amount"] == 50:
 		return True
 	else:
 		return False
@@ -138,21 +138,22 @@ class Chain(object):
 
 	def appendBlock(self, minerAddress, minerPubKey, prevBlockHash, nonce, transactionHashes):
 		if verifyBlock(self.chain, prevBlockHash, nonce, transactionHashes):
-			# Select transactions
 			txs = []
-			for tr in self.mempool:
-				for th in transactionHashes:
-					if tr.hash() == th:
-						txs.append(tr)
 
 			# Create Coinbase for Miner
 			cbase = tx.Coinbase(minerAddress, minerPubKey)
 
 			# Verify Coinbase
-			if verifyCoinbase(chain, cbase):
+			if verifyCoinbase(self.chain, cbase):
 				txs.append(cbase)
 			else:
 				return False
+
+			# Select transactions
+			for tr in self.mempool:
+				for th in transactionHashes:
+					if tr.hash() == th:
+						txs.append(tr)
 
 			# Generate Merkle Root
 			txs_dict = [ str(t.__dict__) for t in txs ]

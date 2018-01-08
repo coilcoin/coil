@@ -77,7 +77,7 @@ def writeHistory():
 	if session["inputs"] != history["inputs"]:
 		# INPUTS: Example line
 		# amount, from, time, previousBlockHash, blockIndex
-		f = open(WALLET_FOLDER + "/history_inputs.csv", "w")
+		f = open(WALLET_FOLDER + "/history_inputs.csv", "a")
 
 		string = ""
 		for i in session["inputs"]:
@@ -91,7 +91,7 @@ def writeHistory():
 	if session["outputs"] != history["outputs"]:
 		# OUTPUTS: Example line
 		# amount, to, time
-		f = open(WALLET_FOLDER + "/history_outputs.csv", "w")
+		f = open(WALLET_FOLDER + "/history_outputs.csv", "a")
 		
 		string = ""
 		for o in session["outputs"]:
