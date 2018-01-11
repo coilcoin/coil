@@ -26,6 +26,8 @@ python coil.py
 Next, go in to `coil.py` and uncomment like 23, and then comment lines 19 & 20. These lines are only available to the creator, who has the `wallet.pem` file (mainly for testing purposes).
 
 ## Wallet
+
+** The current web wallet has been deprecated and now lives in a legacy repository. A new wallet in under development and shall be available for testing soon**
 The wallet is a simple Python Flask application that stores the wallet meta data on disk meaning that anyone who is connected to the server can process a transaction. Therefore, DO NOT allow others to access your wallet server, instead only run the server locally on a trusted and secure network.
 
 To run the server, within the coil directory, simply run the following code in bash...
@@ -46,18 +48,12 @@ def validProof(prevHash, nonce):
 ```
 
 ## Mining
-Coil comes with a built in miner. To run the miner, copy the pubkey and address of your wallet into the `scripts/miner.py` file on lines 26 & 27. Then run the python file.
-
-## Notes from the Developer
-If you look into the source code, you may be surprised by some "design" decisions. Firstly, wallets (yes private keys) are stored by the server. This is purely for development. Once the node software is functioning, server-stored wallets will be removed and a seperate wallet program will be instated.
+Coil comes with a built in miner. To use the miner, update the details in the file and then run `miner2.py`.
 
 ## Dependencies
 * Python 3.6 (only tested with Ubuntu 17.10)
-* aiohttp
+* Flask
 * requests
-
-Optional
-* Flask (required for the wallet)
 
 ## Contributing
 I am looking to build a small community to develop coil further. If you're interested in contributing servers,
