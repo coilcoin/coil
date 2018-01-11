@@ -7,7 +7,7 @@
 # API Overview
 # /chain/<opt_block_no>         DONE
 # /chain/last                   DONE
-# /chain/lastHash
+# /chain/lastHash               DONE
 # /chain/resolve                DONE
 # /join/<address:port>          DONE
 # /resolve/peers                DONE
@@ -15,8 +15,8 @@
 # /balance                      DONE
 # /mempool                      DONE
 # /tx                           DONE [X]
-# /mine
-# /ping
+# /mine                         DONE
+# /ping                         DONE
 
 __version__ = "0.1.0"
 
@@ -31,13 +31,14 @@ from flask import Flask, Response, request, jsonify
 app = Flask(__name__)
 
 # Initialize default node wallet
+WALLET_FOLDER = str(Path.home()) + "/.config/coil/wallets/"
 
 ################################################
 # creator = Wallet()
-# writeWallet("default.pem", creator)
+# writeWallet(WALLET_FOLDER + "master.pem", WALLET_FOLDER + "master.pub.pem", creator)
 ################################################
 
-creator = readWallet(str(Path.home()) + "/.local/coil/wallets/master.pem")
+creator = readWallet(WALLET_FOLDER + "master.pem", WALLET_FOLDER + "master.pub.pem")
 node = Node(creator.address, creator.publicKeyHex)
 
 def respondPlain(txt):
@@ -128,13 +129,14 @@ def resolve_mempool():
 def transaction():
     if request.method == "POST":
         # privatekey, inputs, outputs
-        wallet = request.form.get("wallet")
+        private = request.form.get("private")
+        public = request.form.get("public")
         inputs = request.forms.get("inputs")
         outputs = request.forms.get("outputs")
 
         # Create Wallet object from POST
-        if wallet and inputs and outputs:
-            transactor = Wallet(importKey=binascii.unhexlify(wallet))
+        if private and public and inputs and outputs:
+            transactor = Wallet(privateKey=binascii.unhexlify(private), publicKey=binascii.unhexlify(public))
             tx = Transaction(wallet.address, inputs, outputs, wallet.publicKeyHex)
             tx.sign(transactor.sign(tx.hash()))
 
@@ -147,18 +149,18 @@ def transaction():
 
 @app.route("/mine/", methods=["GET", "POST"])
 def mine():
-    # try:
-    address = request.form.get("minerAddress")
-    minerPubKey = request.form.get("minerPubKey")
-    previousBlockHash = request.form.get("previousBlockHash")
-    nonce = request.form.get("nonce")
-    transactionHashes = request.form.get("transactionHashes")
+    try:
+        address = request.form.get("minerAddress")
+        minerPubKey = request.form.get("minerPubKey")
+        previousBlockHash = request.form.get("previousBlockHash")
+        nonce = request.form.get("nonce")
+        transactionHashes = request.form.get("transactionHashes")
 
-    success = node.submitBlock(address, minerPubKey, previousBlockHash, nonce, transactionHashes)
-    return respondMessage("Successfully submitted block")
+        success = node.submitBlock(address, minerPubKey, previousBlockHash, nonce, transactionHashes)
+        return respondMessage("Successfully submitted block")
 
-    # except:
-    #     return respondMessage("Failed to mine block")
+    except:
+        return respondMessage("Failed to mine block")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=1337, debug=True)

@@ -6,7 +6,8 @@ from pathlib import Path
 from coil.wallet import readWallet
 from coil.proof import validProof
 
-miner = readWallet(str(Path.home()) + "/.local/coil/wallets/master.pem")
+WALLET_FOLDER = str(Path.home()) + "/.config/coil/wallets/"
+miner = readWallet(WALLET_FOLDER + "master.pem", WALLET_FOLDER + "master.pub.pem")
 
 started = datetime.datetime.now()
 total = 0
