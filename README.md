@@ -2,11 +2,6 @@
 
 Coil is an experimental micro cryptocurrency written in Python. It is by no means secure; much of the validation has not yet been implemented. *Coil* refers to the protocol and software, *Coilcoin* refers to the currency (COL).
 
-## TODO
-* Implement target for PoW
-* Encode pubkeys in hex on chain
-* Trace down validation error in trx submission
-
 ## Getting Started
 ### Linux / Mac
 To run the coil dameon, clone the git repo to a sensible place in your HOME directory. Next set the environment variable `COIL` to the location of the coil git repository. This may mean adding the following line to your `.profile` or `.bashrc` file in your HOME directory. You should also append the coil directory to your PATH variable so that the coild file can be run from anywhere in the terminal. For instance...
