@@ -159,6 +159,7 @@ def index():
 
 		with open(WALLET_FOLDER + "/wallet.pem", "r") as f:
 			session["private_key"] = f.read().strip()
+			print(session["private_key"])
 
 		with open(WALLET_FOLDER + "/address", "r") as f:
 			session["address"] = f.read().strip()

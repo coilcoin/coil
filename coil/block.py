@@ -35,10 +35,10 @@ class Block(object):
         pass
 
 class Genesis(Block):
-    def __init__(self, creator):
+    def __init__(self, creator, pubkey):
         # ICO of 120 coins
         txs = [
-            tx.Coinbase(creator, None, amount=12000)
+            tx.Coinbase(creator, pubkey, amount=12000)
         ]
 
         txs_dict = [ str(t.__dict__) for t in txs ]

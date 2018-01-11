@@ -1,9 +1,9 @@
 #!/bin/bash
 
-cd ..
+cd $COIL
 rm -f address
 rm -f pubkey
 rm -f wallet.pem
 rm -rf web-wallet/wallet
-mkdir ../web-wallet/wallet
+mkdir $COIL/web-wallet/wallet
 

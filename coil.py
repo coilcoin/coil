@@ -7,6 +7,8 @@ __version__ = "0.1.0"
 
 import json
 import base64
+import binascii
+
 from Crypto.PublicKey import RSA
 from aiohttp import web
 
@@ -16,25 +18,25 @@ from coil.node import Node
 
 ################################################################
 # Uncomment line below not creator
-node_creator = Wallet()
+# node_creator = Wallet()
 
 # Write out details for use in wallet
-f = open("wallet.pem", "wb")
-f.write(node_creator.importKey)
-f.close()
+# f = open("wallet.pem", "wb")
+# f.write(node_creator.importKey)
+# f.close()
 ################################################################
-# pk = open("web-wallet/wallet/wallet.pem", "r").read().strip()
-# node_creator = Wallet(importKey=pk)
+pk = open("web-wallet/wallet/wallet.pem", "r").read().strip()
+node_creator = Wallet(importKey=pk)
 ################################################################
 
-node = Node(node_creator.address)
+node = Node(node_creator.address, node_creator.publicKeyHex)
 
 f = open("address", "w")
 f.write(str(node_creator.address))
 f.close()
 
 f = open("pubkey", "w")
-f.write(str(node_creator.publicKey.exportKey()))
+f.write(binascii.hexlify(node_creator.publicKey.exportKey()).decode("utf-8"))
 f.close()
 
 def respond(message):
