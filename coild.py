@@ -24,9 +24,11 @@ from coil.wallet import readWallet, writeWallet, Wallet
 from coil.tx import Transaction
 from coil.node import Node
 
+import sys
 import binascii
 from time import time
 from pathlib import Path
+
 from flask import Flask, Response, request, jsonify
 app = Flask(__name__)
 
@@ -163,4 +165,7 @@ def mine():
         return respondMessage("Failed to mine block")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=1337, debug=True)
+    if len(sys.argv) > 1:
+        app.run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)
+    else:
+        app.run(host="0.0.0.0", port=1337, debug=True)
