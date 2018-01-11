@@ -1,6 +1,7 @@
 # wallet.py
-import key
-import chash
+from coil import key
+from coil import chash
+
 import binascii
 import Crypto.Random
 from Crypto.Hash import SHA

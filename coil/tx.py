@@ -6,7 +6,7 @@
 # An Output
 # { address: [someaddress], amount: [someamount] }
 
-import chash
+from coil import chash
 
 def createInput(transaction, index):
 	return { 

@@ -4,11 +4,12 @@ import json
 import sys
 
 from urllib.parse import urlparse
-from tx import Transaction, Coinbase, createInput
-from block import Block
-from chain import Chain
-from wallet import Wallet
 from time import time
+
+from coil.tx import Transaction, Coinbase, createInput
+from coil.block import Block
+from coil.chain import Chain
+from coil.wallet import Wallet
 
 def log(info):
 	print(f"[Message] {info}")

@@ -5,7 +5,7 @@
 # preceding 0's on the result
 # double-sha256 of hash + nonce
 
-import chash
+from coil import chash
 
 def validProof(prevHash, nonce):
 	result = chash.doubleHashEncode(str(prevHash) + str(nonce))

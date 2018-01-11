@@ -1,11 +1,11 @@
 # chain.py
 
-import chash
-import block
-import proof
-import wallet
-import merkle
-import tx
+from coil import chash
+from coil import block
+from coil import proof
+from coil import wallet
+from coil import merkle
+from coil import tx
 
 # Chain is responsible for...
 # 1. Verifying transactions

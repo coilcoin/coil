@@ -2,7 +2,7 @@
 # mainly thanks to...
 # https://gist.github.com/brandomr/f5f325a0e9161d481714efe00d846880
 
-from chash import doubleHashEncode
+from coil.chash import doubleHashEncode
 
 def chunks(l, n):
 	for i in range(0, len(l), n):
