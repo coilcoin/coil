@@ -12,6 +12,7 @@ A single Wire node should provide the following functionality...
 2. Allow clients to submit transactions
 3. Allow miners to submit a mined block
 4. Allow clients/miners to calculate balances
+5. Allows clients/miners to view the mempool
 
 ### Managaing Peers
 Once a node is live, it only requires the address and port to a node that is live within the network. One startup, the node sends a request to its peers to request a list of all other nodes on the network. The peer that receieves the request will then broadcast a message to all of the other known peers. When a node receives this message, a concensus is held between nodes and the longest peer node (that contains live nodes; validated through PING) wins.

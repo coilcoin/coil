@@ -7,6 +7,10 @@
 
 from coil import chash
 
+# def validProof(prevHash, nonce):
+#     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
+#     return result[:5] == "00000" and int(result, 16) % 5 == 0
+
 def validProof(prevHash, nonce):
     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
-    return result[:5] == "00000" and int(result, 16) % 5 == 0
+    return result[:4] == "0000"

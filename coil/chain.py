@@ -77,6 +77,8 @@ def verifyTransaction(chain, tx):
     # the tx has signed the tx
     # address, message, signature
 
+    publicKey = binascii.unhexlify(tx.pubkey.encode("utf-8"))
+
     if not wallet.verifySignature(tx.pubkey, tx.hash(), tx.signature):
         return 3
 
@@ -120,7 +122,7 @@ class Chain(object):
         self.genesis = block.Genesis(self.creator, self.creatorPubKey)
         self.chain.append(self.genesis)
 
-        print("Genesis Hash", self.genesis.transactions[0].hash())
+        # print("Genesis Hash", self.genesis.transactions[0].hash())
 
     @property
     def blockHeight(self):

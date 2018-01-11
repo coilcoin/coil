@@ -14,16 +14,6 @@ from coil.wallet import Wallet
 def log(info):
     print(f"[Message] {info}")
 
-def ping(nodeloc):
-    # Pinging a Wire node...
-    # expects a plain text 
-    response = requests.get("http://" + nodeloc + "/ping").json()
-    if response["time"]:
-        return True
-    else:
-        return False
-
-
 def transactionFromDict(d):
     if d["inputs"] == []:
         # Coinbase Transaction
@@ -81,6 +71,7 @@ class Node(object):
         self.host = "0.0.0.0"
         self.creator = creator
         self.creatorPubKey = creatorPubKey
+        self.mempool = []
 
         if len(sys.argv) > 1:
             self.port = int(sys.argv[1])
@@ -88,7 +79,7 @@ class Node(object):
             self.port = 1337
 
         # Read Peers
-        peers = open("peers.txt", "r").readlines()
+        peers = [ s.strip() for s in open("peers.txt", "r").readlines() ]
         if peers != []:
             for peer in peers:
                 parsed_url = urlparse(peer.strip())
@@ -102,25 +93,58 @@ class Node(object):
         else:
             self.chain = Chain(self.creator, self.creatorPubKey)
 
+    def ping(self, nodeloc):
+        # Pinging a Wire node...
+        # expects a plain text
+        try:
+            response = requests.get("http://" + nodeloc + "/ping").json()
+            if response["time"]:
+                return True
+            else:
+                return False
+
+        except requests.exceptions.RequestException:
+            # Remove peer from pool
+            # & then broastcast
+            return False
+
     def broadcast(self, route):
         # Send a GET request to all registered peers
         # PING all peers, if they're dead... update
         # self.peers
-        for peer in self.peers:
-            if self.ping(peer):
-                requests.get("http://" + peer + route)
-            else:
-                # Remove peer from pool
-                # & then broastcast
-                self.peers.remove(peer)
-                self.broadcast("/resolve/peers")
+        if self.peers:
+            for peer in self.peers.copy():
+                if self.ping(peer):
+                    requests.get("http://" + peer + route)
+                # else:
+                    # Remove peer from pool
+                    # & then broastcast
+                    # self.peers.remove(peer)
+                    # self.broadcast("/resolve/peers")
 
     def registerPeer(self, address):
-        parsed_url = urlparse(peer.strip())
-        self.peers.add(parsed_url.netloc)
+        parsed_url = urlparse("http://" + address.strip())
+        if parsed_url.netloc:
+            self.peers.add(parsed_url.netloc)
     
         # Broadcast to all nodes
         self.broadcast("/resolve/peers")
+
+        return self.peers
+
+    def resolvePeers(self):
+        peersLists = {}
+
+        for peer in self.peers:
+            if self.ping(peer):
+                peerList = requests.get("http://" + peer + "/peers").json()
+                if peerList:
+                    peersLists[peer] = json.loads(peerList)
+ 
+        if peersLists != {}:
+            self.peers = sorted(peersList, key=lambda l: len(peersList[l]), reverse=True)[0]
+
+        return self.peers
 
     def getChain(self):
         fullChain = { "blockHeight": self.chain.blockHeight, "chain": self.chain.displayDict() }
@@ -136,17 +160,45 @@ class Node(object):
     def resolveChain(self):
         maxHeights = {}
 
-        for peer in self.peers:
+        for peer in self.peers.copy():
             if self.ping(peer):
                 response = requests.get("http://" + peer + "/chain").json()
-                maxHeights[node] = response["blockHeight"]
-            else:
-                # Remove peers & resolve
-                self.peers.remove(peer)
-                self.broadcast("/resolve/peers") 
+                maxHeights[peer] = response["blockHeight"]
+            # else:
+            #     # Remove peers & resolve
+            #     self.peers.remove(peer)
+            #     self.broadcast("/resolve/peers") 
 
         # Replace chain
         if maxHeights != {}:
             response = requests.get("http://" + max(maxHeights) + "/chain").json()
-            print(response["chain"])
             self.chain = chainFromResponse(response["chain"])
+
+        fullChain = { "blockHeight": self.chain.blockHeight, "chain": self.chain.displayDict() }
+        return json.dumps(fullChain)
+
+    def getMemPool(self):
+        return [ tx.__dict__ for tx in self.mempool ]
+
+    def resolveMemPool(self):
+        memPools = {}
+
+        for peer in self.peers:
+            if self.ping(peer):
+                response = requests.get("http://" + peer + "/mempool").json()
+                memPools[peer] = response["pools"]
+
+        if memPools != {}:
+            self.mempool = sorted(memPools, key=lambda l: len(memPools[l]), reverse=True)[0]
+
+        return [ tx.__dict__ for tx in self.mempool ]
+
+    def submitTransaction(self, tx):
+        # Broadcast to all the new transaction
+        self.mempool.append(tx)
+        self.broadcast("/resolve/mempool")
+
+    def submitBlock(self, address, minerPubKey, previousBlockHash, nonce, transactionHashes):
+        # Broadcast to all the new block
+        self.chain.appendBlock(address, minerPubKey, previousBlockHash, nonce, transactionHashes)
+        self.broadcast("/resolve/chain")

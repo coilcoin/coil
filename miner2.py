@@ -2,24 +2,25 @@ import requests
 import hashlib
 import datetime
 
-from coil.wallet import Wallet, readWallet
-from coil.chash import 
+from pathlib import Path
+from coil.wallet import readWallet
+from coil.proof import validProof
+
+miner = readWallet(str(Path.home()) + "/.local/coil/wallets/master.pem")
 
 started = datetime.datetime.now()
 total = 0
 
 def main():
-	print("welcome to hacky miner")
+	global total
+	print("welcome to hacky miner2")
 	print("we be mining all t'day")
 	print("Ctrl-C to quit m'deer")
 
 	s = requests.Session()
 	url = "http://localhost:1337"
-
-	#address = s.get(url + "/wallet/new").json()["address"]
-	address = '59fc1b72be43d4e409cbbc2aa2'
-	pubkey = b'-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCpcPyekvm0ZbL5WQ9TXKo3Zkb6\nqp1+ghqdAAjcG3E6t1yQd5/nJG1GyKIbyhDdm4iYJB52qntR/sJgei9ydWe+NMFF\nsfG+TqpZbpK9Kdb65iwj3pDBLoF6vUN6zkyfwACV2lISmslLWq1ms8KorPVFwcop\nMn/h7TF2ObXreeQg4QIDAQAB\n-----END PUBLIC KEY-----'
-	last_hash = s.get(url + "/block/hash").json()["message"]
+	
+	last_hash = s.get(url + "/chain/lastHash/").json()["message"]
 
 	nonce = 0
 
@@ -27,14 +28,14 @@ def main():
 		while True:
 			if validProof(last_hash, nonce):
 				payload = {
-					'minerAddress': address,
+					'minerAddress': miner.address,
 					'previousBlockHash': last_hash,
 					'nonce': str(nonce),
 					'transactionHashes': '',
-					'minerPubKey': pubkey.decode("utf-8")
+					'minerPubKey': miner.publicKeyHex
 				}
 
-				r = s.post(url + "/mine", payload)
+				r = s.post(url + "/mine/", payload)
 				total += 1
 
 				print("New block mined")
@@ -45,10 +46,13 @@ def main():
 				print("Node says:", r.text)
 				print()
 
-				last_hash = s.get(url + "/block/hash").json()["message"]
+				last_hash = s.get(url + "/chain/lastHash/").json()["message"]
 
 			nonce += 1
 
 
 	except KeyboardInterrupt:
 		print()
+
+if __name__ == "__main__":
+	main()
