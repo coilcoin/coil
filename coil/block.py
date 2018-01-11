@@ -1,10 +1,10 @@
 # block.py
 
-import time
-import chash
-import json
-import merkle
-import tx
+import .time
+import .chash
+import .json
+import .merkle
+import .tx
 
 class Block(object):
     def __init__(self, prevHash, nonce, txs, merkle):

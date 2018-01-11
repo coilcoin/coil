@@ -27,11 +27,11 @@ class Wallet(object):
         if not importKey:
             generator = Crypto.Random.new().read
             self.privateKey = RSA.generate(1024, generator)
-            self.publicKey = self.privateKey.publickey()
+            self.publicKey = binascii.hexlify(self.privateKey.publickey())
             self.signature = PKCS1_v1_5.new(self.privateKey)
             self.importKey = self.privateKey.exportKey("PEM")
         else:
-            self.privateKey = RSA.importKey(importKey.encode("utf-8"))
+            self.privateKey = binascii.hexlify(RSA.importKey(importKey.encode("utf-8")))
             self.publicKey = self.privateKey.publickey()
             self.signature = PKCS1_v1_5.new(self.privateKey)
             self.importKey = importKey
