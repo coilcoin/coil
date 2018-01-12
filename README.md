@@ -9,7 +9,9 @@ To run the coil dameon, clone the git repo to a sensible place in your HOME dire
 ```bash
 export COIL=$HOME/path/to/coil
 export PATH=$PATH:$COIL/bin
+coild
 ```
+
 
 ## Alternatively, you can run the coil.py script from within the COIL directory.
 
