@@ -7,7 +7,7 @@ Coil is an experimental micro cryptocurrency written in Python. It is by no mean
 To run the coil dameon, clone the git repo to a sensible place in your HOME directory. Next set the environment variable `COIL` to the location of the coil git repository. This may mean adding the following line to your `.profile` or `.bashrc` file in your HOME directory. You should also append the coil directory to your PATH variable so that the coild file can be run from anywhere in the terminal. For instance...
 
 ```bash
-export COIL=$HOME/path/to/coil/bin
+export COIL=$HOME/path/to/coil
 export PATH=$PATH:$COIL/bin
 ```
 
