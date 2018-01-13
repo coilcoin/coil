@@ -35,7 +35,6 @@ def transactionFromDict(d):
         return Transaction(d["address"], d["signature"], inputs, outputs)
 
 def blockFromDict(d):
-    print(d)
     prevBlockHash = d["previousBlockHash"]
     nonce = d["nonce"]
     txs = [transactionFromDict(t) for t in d["transactions"]]
@@ -151,12 +150,10 @@ class Node(object):
         # Send a GET request to all registered peers
         # PING all peers, if they're dead... update
         # self.peers
-        print("Broadcasting to all peers", route)
         if self.peers:
             for peer in self.peers.copy():
                 if peer != self.nodeLoc:
                     if self.ping(peer):
-                        print("Sending request to ", peer)
                         try:
                             requests.get("http://" + peer + route, timeout=5)
                         except:
@@ -189,18 +186,14 @@ class Node(object):
     def resolvePeers(self):
         peersLists = {}
 
-        print(self.peers)
         for peer in self.peers:
-            print(self.ping(peer))
             if self.ping(peer):
                 peerList = requests.get("http://" + peer + "/peers/", timeout=5).json()
                 if peerList:
                     peersLists[peer] = json.loads(peerList)
 
-        print(peersLists)
         if peersLists != {}:
             self.peers = sorted(peersList, key=lambda l: len(peersList[l]), reverse=True)[0]
-            print(self.peers)
 
         return self.peers
 

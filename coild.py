@@ -102,12 +102,13 @@ def resolve_peers():
     peers = node.resolvePeers()
     return jsonify(peers=list(peers))
 
-@app.route("/peers")
+@app.route("/peers/")
 def peers():
     return jsonify(peers=list(node.peers))
 
-@app.route("/balance/<address>")
+@app.route("/balance/<address>/")
 def balance(address):
+    print(address)
     balance = 0
     for block in node.chain.chain:
         for tx in block.transactions:
@@ -115,16 +116,18 @@ def balance(address):
             if type(tx).__name__ != "dict":
                 tx = tx.__dict__
 
-            if tx["address"] == address:
+            if tx["inputs"] == [] and block.__dict__["nonce"] == None:
                 for o in tx["outputs"]:
-                    if not tx["inputs"] == []: 
-                        balance -= o["amount"]
+                    if o["address"] == address:
+                        balance += o["amount"]
+
+            if tx["address"] == address:
+                balance -= sum([a["amount"] for a in tx["outputs"]])
+                print(sum([a["amount"] for a in tx["outputs"]]))
 
             for o in tx["outputs"]:
                 if o["address"] == address:
-                    # Ignore Coinbase
-                    if tx["inputs"] == []:
-                        balance += o["amount"]
+                    balance += o["amount"]
 
         return jsonify(address=address, balance=balance)
 
