@@ -19,7 +19,7 @@ cd $COIL
 
 Next install the dependencies using pip3
 ```
-sudo apt install python3 pip3
+sudo apt install python3 python3-pip3
 sudo pip3 install flask requests
 ```
 

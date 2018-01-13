@@ -156,7 +156,10 @@ class Node(object):
                 if peer != self.nodeLoc:
                     if self.ping(peer):
                         print("Sending request to ", peer)
-                        requests.get("http://" + peer + route)
+                        try:
+                            requests.get("http://" + peer + route, timeout=5)
+                        except:
+                            return False
                     # else:
                         # Remove peer from pool
                         # & then broastcast
@@ -252,7 +255,6 @@ class Node(object):
     def submitTransaction(self, tx):
         # Broadcast to all the new transaction
         self.mempool.append(tx)
-        self.broadcast("/resolve/mempool/")
 
     def submitBlock(self, address, minerPubKey, previousBlockHash, nonce, transactionHashes):
         # Broadcast to all the new block

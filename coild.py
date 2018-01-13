@@ -154,10 +154,13 @@ def transaction():
 
             # Submit transaction to node
             node.submitTransaction(tx)
+            node.broadcast("/resolve/mempool/")
 
             return respondMessage("Transaction has been submitted")
         else:
             return respondMessage("Invalid POST data")
+
+
 
 @app.route("/mine/", methods=["GET", "POST"])
 def mine():
@@ -169,6 +172,7 @@ def mine():
         transactionHashes = request.form.get("transactionHashes")
 
         success = node.submitBlock(address, minerPubKey, previousBlockHash, nonce, transactionHashes)
+        node.broadcast("/resolve/chain/")
         return respondMessage("Successfully submitted block")
 
     except:
