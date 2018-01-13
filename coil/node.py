@@ -2,14 +2,18 @@
 import requests
 import json
 import sys
+import os
 
 from urllib.parse import urlparse
+from pathlib import Path
 from time import time
 
 from coil.tx import Transaction, Coinbase, createInput
 from coil.block import Block
 from coil.chain import Chain
 from coil.wallet import Wallet
+
+CONFIG_FOLDER = str(Path.home()) + "/.config/coil"
 
 def log(info):
     print(f"[Message] {info}")
@@ -18,7 +22,7 @@ def transactionFromDict(d):
     if d["inputs"] == []:
         # Coinbase Transaction
         o = d["outputs"][0]
-        return Coinbase(o["address"], amount=o["amount"])
+        return Coinbase(o["address"], d["pubkey"], amount=o["amount"])
     else:
         inputs = []
         for i in d["inputs"]:
@@ -45,15 +49,19 @@ def chainFromResponse(response):
 
     # This could be prettier
     creator = genesis.transactions[0].outputs[0]["address"]
+    try:
+        pubkey = genesis.transactions[0]["pubkey"]
+    except:
+        pubkey = genesis.transactions[0].__dict__["pubkey"]
 
-    return Chain(creator, genesis=genesis, chain=blocks)
+    return Chain(creator, pubkey, genesis=genesis, chain=blocks)
 
 def chainFromPeers(peers):
     # Iterate through peers until a
     # valid chain is found
     peer_index = 0
     while peer_index < len(peers):
-        url = "http://" + list(peers)[0] + "/chain"
+        url = "http://" + list(peers)[peer_index] + "/chain/"
 
         try:
             response = requests.get(url)
@@ -63,41 +71,71 @@ def chainFromPeers(peers):
             peer_index += 1		
 
     log("Could not download blockchain from peers.")
+    return False
 
 class Node(object):
-    def __init__(self, creator, creatorPubKey):
+    def __init__(self, creator, creatorPubKey, nodeLoc):
         self.peers = set()
         self.chain = None
-        self.host = "0.0.0.0"
         self.creator = creator
         self.creatorPubKey = creatorPubKey
         self.mempool = []
-
-        if len(sys.argv) > 1:
-            self.port = int(sys.argv[1])
-        else:
-            self.port = 1337
+        self.nodeLoc = nodeLoc
 
         # Read Peers
-        peers = [ s.strip() for s in open("peers.txt", "r").readlines() ]
-        if peers != []:
-            for peer in peers:
-                parsed_url = urlparse(peer.strip())
-                self.peers.add(parsed_url.netloc)
+        # Deprecated: REMOVED use of peers.txt
+        # This should prevent issues for nodes
+        # running on the same system (although
+        # not advised)
+        # peers = [ s.strip() for s in open(os.environ.get("COIL") + "/peers.txt", "r").readlines() ]
+        # if peers != []:
+        #     for peer in peers:
+        #         if peer != "http://" + self.nodeLoc:
+        #             parsed_url = urlparse(peer.strip())
+        #             self.peers.add(parsed_url.netloc)
+                    
+        #             # Attempt to find chain from peers
+        #             # if not, initialize a chain
+        #             self.chain = chainFromPeers(self.peers)
+        #             if not self.chain:
+        #                 self.chain = Chain(self.creator, self.creatorPubKey)
                 
-                # Attempt to find chain from peers
-                # if not, initialize a chain
-                self.chain = chainFromPeers(self.peers)
-                if not self.chain:
-                    self.chain = Chain(self.creator, self.creatorPubKey)
-        else:
-            self.chain = Chain(self.creator, self.creatorPubKey)
+        #     if not self.chain:
+        #         self.chain = Chain(self.creator, self.creatorPubKey)
+        # else:
 
+        # If we already have a local copy of the blockchain
+        # then load it in and then resolve, else just create
+        # a new blockchain object
+        if not self.readFromDisk():
+            self.chain = Chain(self.creator, self.creatorPubKey)
+        else:
+            self.chain = chain=self.readFromDisk()
+
+        self.resolveChain()
+
+    def writeToDisk(self):
+        # Save chain to disk
+        fullChain = { "chain": self.chain.displayDict() }
+        jsonString = json.dumps(fullChain)
+
+        f = open(CONFIG_FOLDER + "/blockchain/chain.json", "w")
+        f.write(jsonString)
+        f.close()
+
+    def readFromDisk(self):
+        try:
+            f = open(CONFIG_FOLDER + "/blockchain/chain.json", "r")
+            response = json.loads(f.read())
+            return chainFromResponse(response["chain"])
+        except:
+            return False
+        
     def ping(self, nodeloc):
         # Pinging a Wire node...
         # expects a plain text
         try:
-            response = requests.get("http://" + nodeloc + "/ping").json()
+            response = requests.get("http://" + nodeloc + "/ping/").json()
             if response["time"]:
                 return True
             else:
@@ -112,23 +150,35 @@ class Node(object):
         # Send a GET request to all registered peers
         # PING all peers, if they're dead... update
         # self.peers
+        print("Broadcasting to all peers", route)
         if self.peers:
             for peer in self.peers.copy():
-                if self.ping(peer):
-                    requests.get("http://" + peer + route)
-                # else:
-                    # Remove peer from pool
-                    # & then broastcast
-                    # self.peers.remove(peer)
-                    # self.broadcast("/resolve/peers")
+                if peer != self.nodeLoc:
+                    if self.ping(peer):
+                        print("Sending request to ", peer)
+                        requests.get("http://" + peer + route)
+                    # else:
+                        # Remove peer from pool
+                        # & then broastcast
+                        # self.peers.remove(peer)
+                        # self.broadcast("/resolve/peers")
 
     def registerPeer(self, address):
         parsed_url = urlparse("http://" + address.strip())
         if parsed_url.netloc:
             self.peers.add(parsed_url.netloc)
-    
+
+        # This this peer is the first
+        # peer this node knows about,
+        # resolve the chain too
+        if len(self.peers) == 1:
+            self.resolveChain()
+
+        # Tell nodes to add new peer
+        self.broadcast("/join/" + address + "/")
+
         # Broadcast to all nodes
-        self.broadcast("/resolve/peers")
+        self.broadcast("/resolve/peers/")
 
         return self.peers
 
@@ -136,13 +186,16 @@ class Node(object):
         peersLists = {}
 
         for peer in self.peers:
+            print(self.ping(peer))
             if self.ping(peer):
-                peerList = requests.get("http://" + peer + "/peers").json()
+                peerList = requests.get("http://" + peer + "/peers/").json()
                 if peerList:
                     peersLists[peer] = json.loads(peerList)
- 
+
+        print(peersLists)
         if peersLists != {}:
             self.peers = sorted(peersList, key=lambda l: len(peersList[l]), reverse=True)[0]
+            print(self.peers)
 
         return self.peers
 
@@ -162,7 +215,7 @@ class Node(object):
 
         for peer in self.peers.copy():
             if self.ping(peer):
-                response = requests.get("http://" + peer + "/chain").json()
+                response = requests.get("http://" + peer + "/chain/").json()
                 maxHeights[peer] = response["blockHeight"]
             # else:
             #     # Remove peers & resolve
@@ -171,8 +224,11 @@ class Node(object):
 
         # Replace chain
         if maxHeights != {}:
-            response = requests.get("http://" + max(maxHeights) + "/chain").json()
-            self.chain = chainFromResponse(response["chain"])
+            response = requests.get("http://" + max(maxHeights) + "/chain/").json()
+            # Save changes to disk
+            self.chain = Chain(self.creator, self.creatorPubKey, chain=chainFromResponse(response["chain"]))
+            
+        self.writeToDisk()
 
         fullChain = { "blockHeight": self.chain.blockHeight, "chain": self.chain.displayDict() }
         return json.dumps(fullChain)
@@ -196,9 +252,9 @@ class Node(object):
     def submitTransaction(self, tx):
         # Broadcast to all the new transaction
         self.mempool.append(tx)
-        self.broadcast("/resolve/mempool")
+        self.broadcast("/resolve/mempool/")
 
     def submitBlock(self, address, minerPubKey, previousBlockHash, nonce, transactionHashes):
         # Broadcast to all the new block
         self.chain.appendBlock(address, minerPubKey, previousBlockHash, nonce, transactionHashes)
-        self.broadcast("/resolve/chain")
+        self.broadcast("/resolve/chain/")

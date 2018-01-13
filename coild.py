@@ -32,8 +32,13 @@ from pathlib import Path
 from flask import Flask, Response, request, jsonify
 app = Flask(__name__)
 
-# Initialize default node wallet
 WALLET_FOLDER = str(Path.home()) + "/.config/coil/wallets/"
+HOST = "0.0.0.0"
+
+if len(sys.argv) > 1:
+    PORT = int(sys.argv[1])
+else:
+    PORT = 1337
 
 ################################################
 # creator = Wallet()
@@ -41,7 +46,7 @@ WALLET_FOLDER = str(Path.home()) + "/.config/coil/wallets/"
 ################################################
 
 creator = readWallet(WALLET_FOLDER + "master.pem", WALLET_FOLDER + "master.pub.pem")
-node = Node(creator.address, creator.publicKeyHex)
+node = Node(creator.address, creator.publicKeyHex, HOST + ":" + str(PORT))
 
 def respondPlain(txt):
     return Response(response=txt, content_type="application/json")
@@ -51,7 +56,7 @@ def respondMessage(txt):
 
 @app.route("/")
 def index():
-    return open("docs/coil.txt", "r").read()
+    return jsonify(time=time())
 
 @app.route("/ping/")
 def ping():
@@ -76,14 +81,19 @@ def last():
 def last_hash():
     return respondMessage(node.chain.lastBlock.hash())
 
-@app.route("/resolve/chain")
+@app.route("/resolve/chain/")
 def resolve_chain():
     return respondPlain(node.resolveChain())
 
 @app.route("/join/<address>/")
 def join(address):
-    peers = node.registerPeer(address)
-    return jsonify(peers=list(peers))
+    # Make sure that address is not this
+    # node's address
+    if address != f"{HOST}:{PORT}":
+        peers = node.registerPeer(address)
+        return jsonify(peers=list(peers))
+    else:
+        return jsonify(peers=list(node.peers))
 
 @app.route("/resolve/peers/")
 def resolve_peers():
@@ -165,7 +175,4 @@ def mine():
         return respondMessage("Failed to mine block")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        app.run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)
-    else:
-        app.run(host="0.0.0.0", port=1337, debug=True)
+    app.run(host=HOST, port=PORT, debug=True)

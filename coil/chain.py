@@ -111,16 +111,20 @@ def verifyBlock(chain, prevBlockHash, nonce, transactionHashes):
 
 class Chain(object):
     def __init__(self, creator, creatorPubKey, genesis=None, chain=[]):
-        self.chain = []
         self.mempool = set()
 
         # self.creator should be an address
         self.creator = creator
         self.creatorPubKey = creatorPubKey
 
-        # Create genesis block
-        self.genesis = block.Genesis(self.creator, self.creatorPubKey)
-        self.chain.append(self.genesis)
+        if not chain:
+            self.chain = []
+
+            # Create genesis block
+            self.genesis = block.Genesis(self.creator, self.creatorPubKey)
+            self.chain.append(self.genesis)
+        else:
+            self.chain = chain
 
         # print("Genesis Hash", self.genesis.transactions[0].hash())
 
