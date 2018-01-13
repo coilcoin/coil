@@ -20,7 +20,8 @@ def main():
 
 	s = requests.Session()
 	url = "http://localhost:1337"
-	
+	#url = "http://192.168.1.17:1337"
+
 	last_hash = s.get(url + "/chain/lastHash/").json()["message"]
 
 	nonce = 0
