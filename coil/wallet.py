@@ -40,7 +40,7 @@ def readWallet(privfilename, pubfilename):
 
 class Wallet(object):
     def __init__(self, privateKey=None, publicKey=None):
-        if not privateKey:
+        if privateKey == None or publicKey == None:
             generator = Crypto.Random.new().read
             self.privateKey = RSA.generate(1024, generator)
             self.publicKey = self.privateKey.publickey()

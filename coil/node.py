@@ -35,6 +35,7 @@ def transactionFromDict(d):
         return Transaction(d["address"], d["signature"], inputs, outputs)
 
 def blockFromDict(d):
+    print(d)
     prevBlockHash = d["previousBlockHash"]
     nonce = d["nonce"]
     txs = [transactionFromDict(t) for t in d["transactions"]]
@@ -42,6 +43,7 @@ def blockFromDict(d):
     return Block(prevBlockHash, nonce, txs, merkleRoot)
 
 def chainFromResponse(response):
+    response = response["chain"]
     blocks = [ blockFromDict(b) for b in response ]
 
     # Get Genesis Block
@@ -87,30 +89,29 @@ class Node(object):
         # This should prevent issues for nodes
         # running on the same system (although
         # not advised)
-        # peers = [ s.strip() for s in open(os.environ.get("COIL") + "/peers.txt", "r").readlines() ]
-        # if peers != []:
-        #     for peer in peers:
-        #         if peer != "http://" + self.nodeLoc:
-        #             parsed_url = urlparse(peer.strip())
-        #             self.peers.add(parsed_url.netloc)
+        peers = [ s.strip() for s in open(os.environ.get("COIL") + "/peers.txt", "r").readlines() ]
+        if peers != []:
+            for peer in peers:
+                if peer != "http://" + self.nodeLoc:
+                    parsed_url = urlparse(peer.strip())
+                    self.peers.add(parsed_url.netloc)
                     
-        #             # Attempt to find chain from peers
-        #             # if not, initialize a chain
-        #             self.chain = chainFromPeers(self.peers)
-        #             if not self.chain:
-        #                 self.chain = Chain(self.creator, self.creatorPubKey)
+                    # Attempt to find chain from peers
+                    # if not, initialize a chain
+                    self.chain = chainFromPeers(self.peers)
+                    if not self.chain:
+                        self.chain = Chain(self.creator, self.creatorPubKey)
                 
-        #     if not self.chain:
-        #         self.chain = Chain(self.creator, self.creatorPubKey)
-        # else:
-
-        # If we already have a local copy of the blockchain
-        # then load it in and then resolve, else just create
-        # a new blockchain object
-        if not self.readFromDisk():
-            self.chain = Chain(self.creator, self.creatorPubKey)
+            # if not self.chain:
+            #     self.chain = Chain(self.creator, self.creatorPubKey)
         else:
-            self.chain = chain=self.readFromDisk()
+            # If we already have a local copy of the blockchain
+            # then load it in and then resolve, else just create
+            # a new blockchain object
+            if not self.readFromDisk():
+                self.chain = Chain(self.creator, self.creatorPubKey)
+            else:
+                self.chain = chain=self.readFromDisk()
 
         self.resolveChain()
 
@@ -188,10 +189,11 @@ class Node(object):
     def resolvePeers(self):
         peersLists = {}
 
+        print(self.peers)
         for peer in self.peers:
             print(self.ping(peer))
             if self.ping(peer):
-                peerList = requests.get("http://" + peer + "/peers/").json()
+                peerList = requests.get("http://" + peer + "/peers/", timeout=5).json()
                 if peerList:
                     peersLists[peer] = json.loads(peerList)
 
@@ -229,7 +231,7 @@ class Node(object):
         if maxHeights != {}:
             response = requests.get("http://" + max(maxHeights) + "/chain/").json()
             # Save changes to disk
-            self.chain = chainFromResponse(response["chain"])
+            self.chain = chainFromResponse(response)
             
         self.writeToDisk()
 
