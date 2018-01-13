@@ -9,11 +9,20 @@ To run the coil dameon, clone the git repo to a sensible place in your HOME dire
 ```bash
 export COIL=$HOME/path/to/coil
 export PATH=$PATH:$COIL/bin
+```
+
+Next run the setup script to initialize some required `.config` files and directories.
+```bash
+cd $COIL
+./scripts/setup.sh
+```
+
+Finally run the `coild` program
+```bash
 coild
 ```
 
-
-## Alternatively, you can run the coil.py script from within the COIL directory.
+### Alternatively, you can run the coil.py script from within the COIL directory.
 
 To initialize a node, run the python script...
 ```bash
