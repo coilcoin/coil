@@ -261,4 +261,3 @@ class Node(object):
     def submitBlock(self, address, minerPubKey, previousBlockHash, nonce, transactionHashes):
         # Broadcast to all the new block
         self.chain.appendBlock(address, minerPubKey, previousBlockHash, nonce, transactionHashes)
-        self.broadcast("/resolve/chain/")
