@@ -7,9 +7,11 @@ Coil is an experimental micro cryptocurrency written in Python. It is by no mean
 To run the coil dameon, clone the git repo to a sensible place in your HOME directory. Next set the environment variable `COIL` to the location of the coil git repository. This may mean adding the following line to your `.profile` or `.bashrc` file in your HOME directory. You should also append the coil directory to your PATH variable so that the coild file can be run from anywhere in the terminal. For instance...
 
 ```bash
-export COIL=$HOME/path/to/coil/bin
+export COIL=$HOME/path/to/coil
 export PATH=$PATH:$COIL/bin
+coild
 ```
+
 
 ## Alternatively, you can run the coil.py script from within the COIL directory.
 
@@ -32,7 +34,7 @@ python web-wallet/wallet.py
 This will start a local server running on port 5000. To access the wallet, open a browser and visit `http://localhost:5000/`. The wallet details are stored in the directory `web-wallet/wallet`, so to export or import a wallet it is suggested that you manage this folder yourself.
 
 ## Proof of work
-The proof of work algorithm used by Coil is called current. A valid proof is constructed from a nonce and previous hash. The resulting hash of these components must have 7 preceeding 0s and the hex equivalent of the hexdigest must be divisible by 7.
+The proof of work algorithm used by Coil is called current. A valid proof is constructed from a nonce and previous hash. The resulting hash of these components must have 5 preceeding 0s and the hex equivalent of the hexdigest must be divisible by 5.
 
 ```python
 def validProof(prevHash, nonce):
