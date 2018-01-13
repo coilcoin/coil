@@ -89,7 +89,7 @@ def resolve_chain():
 def join(address):
     # Make sure that address is not this
     # node's address
-    if address != HOST + ":" + PORT:
+    if address != HOST + ":" + str(PORT):
         peers = node.registerPeer(address)
         return jsonify(peers=list(peers))
     else:

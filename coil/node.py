@@ -229,7 +229,7 @@ class Node(object):
         if maxHeights != {}:
             response = requests.get("http://" + max(maxHeights) + "/chain/").json()
             # Save changes to disk
-            self.chain = Chain(self.creator, self.creatorPubKey, chain=chainFromResponse(response["chain"]))
+            self.chain = chainFromResponse(response["chain"])
             
         self.writeToDisk()
 
