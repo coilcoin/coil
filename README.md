@@ -17,14 +17,15 @@ cd $COIL
 ./scripts/setup.sh
 ```
 
-Next install the dependencies using pip3
+Next install the dependencies using pip3...
 ```
 sudo apt install python3 python3-pip3
 sudo pip3 install flask requests
 ```
 
-Finally run the `coild` program
+Finally generate a new wallet for the node to use and run the `coild` program
 ```bash
+./new.py master
 coild
 ```
 
