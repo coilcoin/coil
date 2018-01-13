@@ -23,6 +23,9 @@ sudo apt install python3 python3-pip3
 sudo pip3 install flask requests
 ```
 
+Add a known peer to the peers.txt folder (remove any existing IPs)
+
+
 Finally generate a new wallet for the node to use and run the `coild` program
 ```bash
 ./new.py master
