@@ -16,7 +16,7 @@ from coil.wallet import Wallet
 CONFIG_FOLDER = str(Path.home()) + "/.config/coil"
 
 def log(info):
-    print(f"[Message] {info}")
+    print("[Message] " + info)
 
 def transactionFromDict(d):
     if d["inputs"] == []:
