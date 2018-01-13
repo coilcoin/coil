@@ -17,6 +17,12 @@ cd $COIL
 ./scripts/setup.sh
 ```
 
+Next install the dependencies using pip3
+```
+sudo apt install python3 pip3
+sudo pip3 install flask requests
+```
+
 Finally run the `coild` program
 ```bash
 coild
