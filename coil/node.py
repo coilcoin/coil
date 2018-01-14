@@ -178,15 +178,14 @@ class Node(object):
         # just incase they weren't live
         # on load
         self.peers = self.peers.union(self.readPeers())
-
         for peer in self.peers:
             if self.ping(peer):
                 peerList = requests.get("http://" + peer + "/peers/", timeout=5).json()
                 if peerList:
-                    peersLists[peer] = json.loads(peerList)
+                    peersLists[peer] = peerList
 
         if peersLists != {}:
-            self.peers = sorted(peersList, key=lambda l: len(peersList[l]), reverse=True)[0]
+            self.peers = set(sorted(peersLists, key=lambda l: len(peersLists[l]), reverse=True))
 
         return self.peers
 
