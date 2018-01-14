@@ -21,13 +21,13 @@ def main():
 	s = requests.Session()
 	#url = "http://localhost:1337"
 	url = "http://192.168.1.17:1337"
-
-	last_hash = s.get(url + "/chain/lastHash/").json()["message"]
-
 	nonce = 0
 
 	try:
 		while True:
+			# Check to see if last hash has changed
+			last_hash = s.get(url + "/chain/lastHash/").json()["message"]
+
 			if validProof(last_hash, nonce):
 				payload = {
 					'minerAddress': miner.address,
@@ -47,8 +47,6 @@ def main():
 
 				print("Node says:", r.text)
 				print()
-
-				last_hash = s.get(url + "/chain/lastHash/").json()["message"]
 
 			nonce += 1
 
