@@ -91,14 +91,14 @@ class Node(object):
         self.resolveChain()
 
     def readPeers(self):
-        lines = open(CONFIG_FOLDER + "/peers.txt", "r").readline()
+        lines = open(CONFIG_FOLDER + "/peers.txt", "r").readlines()
+        lines = [ s.strip() for s in lines ]
         livePeers = set()
 
-        peers = [ s.strip() for s in lines ]
-        if peers != []:
-            for peer in peers:
-                if peer != "http://" + self.nodeLoc:
-                    parsed_url = urlparse(peer.strip())
+        for peer in lines:
+            if peer != "http://" + self.nodeLoc:
+                parsed_url = urlparse(peer)
+                if self.ping(parsed_url.netloc):
                     livePeers.add(parsed_url.netloc)
 
         return livePeers
