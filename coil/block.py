@@ -31,9 +31,6 @@ class Block(object):
         newblock["transactions"] = newtransactions
         return json.dumps(newblock)
 
-    def verify(self):
-        pass
-
 class Genesis(Block):
     def __init__(self, creator, pubkey):
         # ICO of 120 coins

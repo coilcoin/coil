@@ -72,7 +72,7 @@ def chainFromPeers(peers):
             peer_index += 1		
 
     log("Could not download blockchain from peers.")
-    return False
+    raise "Could not download blockchain from peers."
 
 class Node(object):
     def __init__(self, creator, creatorPubKey, nodeLoc):
@@ -84,10 +84,6 @@ class Node(object):
         self.nodeLoc = nodeLoc
 
         # Read Peers
-        # Deprecated: REMOVED use of peers.txt
-        # This should prevent issues for nodes
-        # running on the same system (although
-        # not advised)
         peers = [ s.strip() for s in open(os.environ.get("COIL") + "/peers.txt", "r").readlines() ]
         if peers != []:
             for peer in peers:
@@ -97,20 +93,16 @@ class Node(object):
                     
                     # Attempt to find chain from peers
                     # if not, initialize a chain
-                    self.chain = chainFromPeers(self.peers)
-                    if not self.chain:
-                        self.chain = Chain(self.creator, self.creatorPubKey)
-                
-            # if not self.chain:
-            #     self.chain = Chain(self.creator, self.creatorPubKey)
-        else:
-            # If we already have a local copy of the blockchain
-            # then load it in and then resolve, else just create
-            # a new blockchain object
-            if not self.readFromDisk():
-                self.chain = Chain(self.creator, self.creatorPubKey)
-            else:
-                self.chain = chain=self.readFromDisk()
+                    try:
+                        self.chain = chainFromPeers(self.peers)
+                    except:
+                        # If we already have a local copy of the blockchain
+                        # then load it in and then resolve, else just create
+                        # a new blockchain object
+                        if not self.readFromDisk():
+                            self.chain = Chain(self.creator, self.creatorPubKey)
+                        else:
+                            self.chain = self.readFromDisk()
 
         self.resolveChain()
 
