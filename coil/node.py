@@ -61,15 +61,15 @@ def chainFromPeers(peers):
     # Iterate through peers until a
     # valid chain is found
     peer_index = 0
-    while peer_index < len(peers):
-        url = "http://" + list(peers)[peer_index] + "/chain/"
+    for peer in peers:
+        url = "http://" + peer + "/chain/"
 
         try:
             response = requests.get(url)
             return chainFromResponse(response.json())
 
         except requests.exceptions.RequestException:
-            peer_index += 1		
+            print("Continue")
 
     log("Could not download blockchain from peers.")
     raise "Could not download blockchain from peers."
@@ -89,20 +89,13 @@ class Node(object):
             for peer in peers:
                 if peer != "http://" + self.nodeLoc:
                     parsed_url = urlparse(peer.strip())
-                    self.peers.add(parsed_url.netloc)
+                    if self.ping(parsed_url.netloc):
+                        self.peers.add(parsed_url.netloc)
                     
-                    # Attempt to find chain from peers
-                    # if not, initialize a chain
-                    try:
-                        self.chain = chainFromPeers(self.peers)
-                    except:
-                        # If we already have a local copy of the blockchain
-                        # then load it in and then resolve, else just create
-                        # a new blockchain object
-                        if not self.readFromDisk():
-                            self.chain = Chain(self.creator, self.creatorPubKey)
-                        else:
-                            self.chain = self.readFromDisk()
+        if not self.readFromDisk():
+            self.chain = Chain(self.creator, self.creatorPubKey)
+        else:
+            self.chain = self.readFromDisk()
 
         self.resolveChain()
 
