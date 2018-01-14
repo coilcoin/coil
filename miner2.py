@@ -20,13 +20,18 @@ def main():
 
 	s = requests.Session()
 	#url = "http://localhost:1337"
-	url = "http://192.168.1.17:1337"
+	url = "http://80.42.86.151:1337"
 	nonce = 0
+	last_hash = None
 
 	try:
 		while True:
 			# Check to see if last hash has changed
-			last_hash = s.get(url + "/chain/lastHash/").json()["message"]
+			if nonce % 50 == 0:
+				try:
+					last_hash = s.get(url + "/chain/lastHash/").json()["message"]
+				except:
+					raise Exception("Could not fetch last hash. Node offline?")
 
 			if validProof(last_hash, nonce):
 				payload = {
