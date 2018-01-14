@@ -108,7 +108,6 @@ def peers():
 
 @app.route("/balance/<address>/")
 def balance(address):
-    print(address)
     balance = 0
     for block in node.chain.chain:
         for tx in block.transactions:
@@ -116,20 +115,22 @@ def balance(address):
             if type(tx).__name__ != "dict":
                 tx = tx.__dict__
 
-            if tx["inputs"] == [] and block.__dict__["nonce"] == None:
+            # If Coinbase
+            if tx["address"] == address:
+                for o in tx["outputs"]:
+                    if o["address"] == address:
+                        balance += o["amount"]
+                        
+            else if tx["address"] != address:
                 for o in tx["outputs"]:
                     if o["address"] == address:
                         balance += o["amount"]
 
-            if tx["address"] == address:
+            outputAddresses = [ a["address"] for a in tx["outputs"] ]
+            if tx["address"] == address and not address in outputAddresses:
                 balance -= sum([a["amount"] for a in tx["outputs"]])
-                print(sum([a["amount"] for a in tx["outputs"]]))
 
-            for o in tx["outputs"]:
-                if o["address"] == address:
-                    balance += o["amount"]
-
-        return jsonify(address=address, balance=balance)
+    return jsonify(address=address, balance=balance)
 
 @app.route("/mempool/")
 def mempool():

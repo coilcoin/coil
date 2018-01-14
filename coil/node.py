@@ -22,7 +22,7 @@ def transactionFromDict(d):
     if d["inputs"] == []:
         # Coinbase Transaction
         o = d["outputs"][0]
-        return Coinbase(o["address"], d["pubkey"], amount=o["amount"])
+        return Coinbase(o["address"], d["publicKey"], amount=o["amount"])
     else:
         inputs = []
         for i in d["inputs"]:
@@ -53,7 +53,7 @@ def chainFromResponse(response):
     try:
         pubkey = genesis.transactions[0]["pubkey"]
     except:
-        pubkey = genesis.transactions[0].__dict__["pubkey"]
+        pubkey = genesis.transactions[0].__dict__["publicKey"]
 
     return Chain(creator, pubkey, genesis=genesis, chain=blocks)
 
