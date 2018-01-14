@@ -79,7 +79,7 @@ def verifyTransaction(chain, tx):
 
     publicKey = binascii.unhexlify(tx.pubkey.encode("utf-8"))
 
-    if not wallet.verifySignature(tx.pubkey, tx.hash(), tx.signature):
+    if not wallet.verifySignature(publicKey, tx.hash(), tx.signature):
         return 3
 
     # Verify that the wallet has

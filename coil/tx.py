@@ -4,7 +4,7 @@
 # { prevTransHash: [somehash], index: [someindex] }
 
 # An Output
-# { address: [someaddress], amount: [someamount] }
+# { address: [someaddress], amount: [someamount], pubkey: [] }
 
 from coil import chash
 
@@ -21,11 +21,11 @@ def createOutput(address, amount):
     }
 
 class Transaction(object):
-    def __init__(self, address, inputs, outputs, pubkey):
+    def __init__(self, address, inputs, outputs, publicKey):
         self.address = address
         self.inputs = inputs
         self.outputs = outputs
-        self.pubkey = pubkey
+        self.publicKey = publicKey
 
     def sign(self, sig):
         self.signature = sig
@@ -33,7 +33,6 @@ class Transaction(object):
     def hash(self):
         h = dict(self.__dict__)
         del h["address"]
-        del h["pubkey"]
         # del h["signature"]
         return chash.doubleHashEncodeJSON(self.__dict__)
 
