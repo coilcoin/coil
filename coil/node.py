@@ -99,8 +99,7 @@ class Node(object):
             for peer in peers:
                 if peer != "http://" + self.nodeLoc:
                     parsed_url = urlparse(peer.strip())
-                    if self.ping(parsed_url.netloc):
-                        livePeers.add(parsed_url.netloc)
+                    livePeers.add(parsed_url.netloc)
 
         return livePeers
 
