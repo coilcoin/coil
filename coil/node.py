@@ -76,21 +76,12 @@ def chainFromPeers(peers):
 
 class Node(object):
     def __init__(self, creator, creatorPubKey, nodeLoc):
-        self.peers = set()
         self.chain = None
         self.creator = creator
         self.creatorPubKey = creatorPubKey
         self.mempool = []
-        self.nodeLoc = nodeLoc
-
-        # Read Peers
-        peers = [ s.strip() for s in open(CONFIG_FOLDER + "/peers.txt", "r").readlines() ]
-        if peers != []:
-            for peer in peers:
-                if peer != "http://" + self.nodeLoc:
-                    parsed_url = urlparse(peer.strip())
-                    if self.ping(parsed_url.netloc):
-                        self.peers.add(parsed_url.netloc)
+        self.nodeLoc = nodeLoc        
+        self.peers = self.readPeers()
                     
         if not self.readFromDisk():
             self.chain = Chain(self.creator, self.creatorPubKey)
@@ -98,6 +89,20 @@ class Node(object):
             self.chain = self.readFromDisk()
 
         self.resolveChain()
+
+    def readPeers(self):
+        lines = open(CONFIG_FOLDER + "/peers.txt", "r").readline()
+        livePeers = set()
+
+        peers = [ s.strip() for s in lines ]
+        if peers != []:
+            for peer in peers:
+                if peer != "http://" + self.nodeLoc:
+                    parsed_url = urlparse(peer.strip())
+                    if self.ping(parsed_url.netloc):
+                        livePeers.add(parsed_url.netloc)
+
+        return livePeers
 
     def writeToDisk(self):
         # Save chain to disk
@@ -170,6 +175,11 @@ class Node(object):
 
     def resolvePeers(self):
         peersLists = {}
+
+        # Read in peers from peers.txt
+        # just incase they weren't live
+        # on load
+        self.peers = self.peers.union(self.readPeers())
 
         for peer in self.peers:
             if self.ping(peer):
