@@ -84,7 +84,7 @@ class Node(object):
         self.nodeLoc = nodeLoc
 
         # Read Peers
-        peers = [ s.strip() for s in open(os.environ.get("COIL") + "/peers.txt", "r").readlines() ]
+        peers = [ s.strip() for s in open(CONFIG_FOLDER + "/peers.txt", "r").readlines() ]
         if peers != []:
             for peer in peers:
                 if peer != "http://" + self.nodeLoc:
