@@ -120,8 +120,8 @@ def balance(address):
                 for o in tx["outputs"]:
                     if o["address"] == address:
                         balance += o["amount"]
-                        
-            else if tx["address"] != address:
+
+            elif tx["address"] != address:
                 for o in tx["outputs"]:
                     if o["address"] == address:
                         balance += o["amount"]
