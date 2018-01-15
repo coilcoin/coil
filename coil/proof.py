@@ -7,6 +7,15 @@
 
 from coil import chash
 
+TARGET = 15
+
 def validProof(prevHash, nonce):
     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
-    return result[:5] == "00000" and int(result, 16) % 5 == 0
+
+    max_count = 0
+    for ch in result:
+        count = result.count(ch)
+        if count > max_count:
+            max_count = count
+    
+    return max_count > 7

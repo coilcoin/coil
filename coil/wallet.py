@@ -2,6 +2,7 @@
 from coil import key
 from coil import chash
 
+import json
 import binascii
 import Crypto.Random
 from Crypto.Hash import SHA
@@ -21,22 +22,23 @@ def verifySignature(pubkey, message, signature):
     return verifier.verify(h, binascii.unhexlify(signature))
 
 def exportWallet(wallet):
-    return { "privateKey": wallet.privateKeyHex, "publicKey": wallet.publicKeyHex }
+    return { 
+        "privateKey": wallet.privateKey.exportKey("PEM").decode("utf8"),
+        "publicKey": wallet.publicKey.exportKey("PEM").decode("utf8"),
+        "address": wallet.address,
+    }
 
-def writeWallet(privfilename, pubfilename, wallet):
-    f = open(privfilename, "wb")
-    f.write(wallet.privateKey.exportKey("PEM"))
+def writeWallet(filename, wallet):
+    f = open(filename, "w")
+    f.write(json.dumps(exportWallet(wallet)))
     f.close()
 
-    f = open(pubfilename, "wb")
-    f.write(wallet.publicKey.exportKey("PEM"))
-    f.close()
-
-def readWallet(privfilename, pubfilename):
-    pri = open(privfilename, "rb").read()
-    pub = open(pubfilename, "rb").read()
-
-    return Wallet(privateKey=pri, publicKey=pub)
+def readWallet(filename):
+    try:
+        f = json.loads(open(filename, "r").read())
+        return Wallet(privateKey=f["privateKey"], publicKey=f["publicKey"].encode("utf8"))
+    except:
+        raise Exception("Invalid Wallet File.")
 
 class Wallet(object):
     def __init__(self, privateKey=None, publicKey=None):

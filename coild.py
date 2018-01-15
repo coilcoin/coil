@@ -42,10 +42,10 @@ else:
 
 ################################################
 # creator = Wallet()
-# writeWallet(WALLET_FOLDER + "master.pem", WALLET_FOLDER + "master.pub.pem", creator)
+# writeWallet(WALLET_FOLDER + "master.json", creator)
 ################################################
 
-creator = readWallet(WALLET_FOLDER + "master.pem", WALLET_FOLDER + "master.pub.pem")
+creator = readWallet(WALLET_FOLDER + "master.json")
 node = Node(creator.address, creator.publicKeyHex, HOST + ":" + str(PORT))
 
 def respondPlain(txt):
@@ -163,8 +163,6 @@ def transaction():
             return respondMessage("Transaction has been submitted")
         else:
             return respondMessage("Invalid POST data")
-
-
 
 @app.route("/mine/", methods=["GET", "POST"])
 def mine():
