@@ -7,7 +7,7 @@ import datetime
 
 from pathlib import Path
 from coil.wallet import readWallet
-from coil.proof import validProof
+from coil.proof import validProof, proof
 
 WALLET_FOLDER = str(Path.home()) + "/.config/coil/wallets/"
 miner = readWallet(WALLET_FOLDER + "master.json")
@@ -55,7 +55,7 @@ def main():
 						nonce = 0
 
 			if validProof(last_hash, nonce):
-				print(validProof(last_hash, nonce))
+				print(proof(last_hash, nonce))
 				payload = {
 					'minerAddress': miner.address,
 					'previousBlockHash': last_hash,

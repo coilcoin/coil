@@ -53,12 +53,19 @@ python web-wallet/wallet.py
 This will start a local server running on port 5000. To access the wallet, open a browser and visit `http://localhost:5000/`. The wallet details are stored in the directory `web-wallet/wallet`, so to export or import a wallet it is suggested that you manage this folder yourself.
 
 ## Proof of work
-The proof of work algorithm used by Coil is called current. A valid proof is constructed from a nonce and previous hash. The resulting hash of these components must have 5 preceeding 0s and the hex equivalent of the hexdigest must be divisible by 5.
+The proof of work algorithm used by Coil is called current. A valid proof is constructed from a nonce and previous hash. The resulting hash of these components must contain a character that is repeated atleast as many times as the TARGET value.
 
 ```python
 def validProof(prevHash, nonce):
-	result = doubleHashEncode(str(prevHash) + str(nonce))
-	return result[:5] == "00000" and int(result, 16) % 5 == 0
+    result = chash.doubleHashEncode(str(prevHash) + str(nonce))
+
+    max_count = 0
+    for ch in result:
+        count = result.count(ch)
+        if count > max_count:
+            max_count = count
+    
+    return max_count >= TARGET
 ```
 
 ## Mining

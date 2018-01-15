@@ -7,7 +7,19 @@
 
 from coil import chash
 
-TARGET = 15
+TARGET = 18
+
+def proof(prevHash, nonce):
+    result = chash.doubleHashEncode(str(prevHash) + str(nonce))
+
+    max_count = 0
+    for ch in result:
+        count = result.count(ch)
+        if count > max_count:
+            max_count = count
+    
+    if max_count >= TARGET:
+        return result
 
 def validProof(prevHash, nonce):
     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
@@ -18,4 +30,4 @@ def validProof(prevHash, nonce):
         if count > max_count:
             max_count = count
     
-    return max_count > 7
+    return max_count >= TARGET
