@@ -56,16 +56,7 @@ This will start a local server running on port 5000. To access the wallet, open 
 The proof of work algorithm used by Coil is called current. A valid proof is constructed from a nonce and previous hash. The resulting hash of these components must contain a character that is repeated atleast as many times as the TARGET value.
 
 ```python
-def validProof(prevHash, nonce):
-    result = chash.doubleHashEncode(str(prevHash) + str(nonce))
-
-    max_count = 0
-    for ch in result:
-        count = result.count(ch)
-        if count > max_count:
-            max_count = count
-    
-    return max_count >= TARGET
+[ Proof of working is undergoing work ]
 ```
 
 ## Mining

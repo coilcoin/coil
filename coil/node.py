@@ -83,11 +83,11 @@ class Node(object):
         self.mempool = []
         self.nodeLoc = nodeLoc        
         self.peers = self.readPeers()
-                    
-        if not self.readFromDisk():
-            self.chain = Chain(self.creator, self.creatorPubKey)
-        else:
+
+        if self.readFromDisk():
             self.chain = self.readFromDisk()
+        else:
+            self.chain = Chain(self.creator, self.creatorPubKey)
 
         self.resolveChain()
         print("Node is live")
@@ -127,6 +127,7 @@ class Node(object):
         try:
             response = requests.get("http://" + nodeloc + "/ping/", timeout=5).json()
             if response["time"]:
+                print("Successfull ping")
                 return True
             else:
                 return False
@@ -148,11 +149,12 @@ class Node(object):
                             requests.get("http://" + peer + route, timeout=5)
                         except:
                             return False
-                    # else:
+                    else:
                         # Remove peer from pool
                         # & then broastcast
-                        # self.peers.remove(peer)
-                        # self.broadcast("/resolve/peers")
+                        if peer in self.peers:
+                            self.peers.remove(peer)
+                            self.broadcast("/resolve/peers")
 
     def registerPeer(self, address):
         parsed_url = urlparse("http://" + address.strip())

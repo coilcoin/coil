@@ -11,9 +11,9 @@ from coil import chash
 
 def proof(prevHash, nonce):
     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
-    if result[:4] == "0000" and int(result, 16) % 123 == 0:
+    if result[:4] == "0000" and int(result, 16) % 9 == 0:
         return result
 
 def validProof(prevHash, nonce):
     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
-    return result[:4] == "0000" and int(result, 16) % 123 == 0
+    return result[:4] == "0000" and int(result, 16) % 9 == 0
