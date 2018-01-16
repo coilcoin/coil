@@ -40,7 +40,7 @@ def main():
 	f = open(WALLET_FOLDER + "../peers.txt", "r")
 	first = f.readlines()[0]
 	if first:
-		url = "http://" + first.strip()
+		url = first.strip()
 	else:
 		raise Exception("Could not connect to node 0 in peers.txt!")
 
@@ -57,11 +57,13 @@ def main():
 					print(x)
 				
 				else:
-					response = new_last_hash.json()
-					if ["message"] in response:
-						new_last_hash = response["message"]
-						if new_last_hash != last_hash:
+					if new_last_hash:
+						message = new_last_hash.json()["message"]
+						if message != last_hash:
 							nonce = 0
+							last_hash = message
+					else:
+						raise "Didn't get response"
 
 			if validProof(last_hash, nonce):
 				payload = {

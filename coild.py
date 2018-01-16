@@ -24,6 +24,8 @@ from coil.wallet import readWallet, writeWallet, Wallet
 from coil.tx import Transaction
 from coil.node import Node
 
+from config import *
+
 import sys
 import binascii
 from time import time
@@ -32,7 +34,6 @@ from pathlib import Path
 from flask import Flask, Response, request, jsonify
 app = Flask(__name__)
 
-WALLET_FOLDER = str(Path.home()) + "/.config/coil/wallets/"
 HOST = "0.0.0.0"
 
 if len(sys.argv) > 1:
