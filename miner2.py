@@ -36,13 +36,20 @@ def main():
 
 	s = requests.Session()
 	url = "http://localhost:1337"
-	#url = "http://80.42.86.151:1337"
+
+	f = open(WALLET_FOLDER + "../peers.txt", "r")
+	first = f.readlines()[0]
+	if first:
+		url = first
+	else:
+		raise Exception("Could not connect to node 0 in peers.txt!")
+
 	nonce = 0
 	last_hash = None
-
 	try:
 		while True:
 			# Check to see if last hash has changed
+			new_last_hash = None
 			if nonce % 500000 == 0:
 				try:
 					new_last_hash = requests_retry_session().get(url + "/chain/lastHash/")
@@ -50,9 +57,11 @@ def main():
 					print(x)
 				
 				else:
-					new_last_hash = new_last_hash.json()["message"]
-					if new_last_hash != last_hash:
-						nonce = 0
+					response = new_last_hash.json()
+					if ["message"] in response:
+						new_last_hash = response["message"]
+						if new_last_hash != last_hash:
+							nonce = 0
 
 			if validProof(last_hash, nonce):
 				payload = {
