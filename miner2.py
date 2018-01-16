@@ -40,7 +40,7 @@ def main():
 	f = open(WALLET_FOLDER + "../peers.txt", "r")
 	first = f.readlines()[0]
 	if first:
-		url = first
+		url = "http://" + first.strip()
 	else:
 		raise Exception("Could not connect to node 0 in peers.txt!")
 
