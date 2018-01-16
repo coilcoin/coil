@@ -76,6 +76,7 @@ def chainFromPeers(peers):
 
 class Node(object):
     def __init__(self, creator, creatorPubKey, nodeLoc):
+        print("Spinning up node...")
         self.chain = None
         self.creator = creator
         self.creatorPubKey = creatorPubKey
@@ -89,6 +90,7 @@ class Node(object):
             self.chain = self.readFromDisk()
 
         self.resolveChain()
+        print("Node is live")
 
     def readPeers(self):
         lines = open(CONFIG_FOLDER + "/peers.txt", "r").readlines()
@@ -123,7 +125,7 @@ class Node(object):
         # Pinging a Wire node...
         # expects a plain text
         try:
-            response = requests.get("http://" + nodeloc + "/ping/").json()
+            response = requests.get("http://" + nodeloc + "/ping/", timeout=5).json()
             if response["time"]:
                 return True
             else:

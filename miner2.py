@@ -55,7 +55,6 @@ def main():
 						nonce = 0
 
 			if validProof(last_hash, nonce):
-				print(proof(last_hash, nonce))
 				payload = {
 					'minerAddress': miner.address,
 					'previousBlockHash': last_hash,

@@ -7,27 +7,13 @@
 
 from coil import chash
 
-TARGET = 18
+# Target is determined by proof_test.py
 
 def proof(prevHash, nonce):
     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
-
-    max_count = 0
-    for ch in result:
-        count = result.count(ch)
-        if count > max_count:
-            max_count = count
-    
-    if max_count >= TARGET:
+    if result[:4] == "0000" and int(result, 16) % 123 == 0:
         return result
 
 def validProof(prevHash, nonce):
     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
-
-    max_count = 0
-    for ch in result:
-        count = result.count(ch)
-        if count > max_count:
-            max_count = count
-    
-    return max_count >= TARGET
+    return result[:4] == "0000" and int(result, 16) % 123 == 0
