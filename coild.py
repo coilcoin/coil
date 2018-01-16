@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # coild.py
 # Coil Daemon
 # Primitive Cryptocurrency

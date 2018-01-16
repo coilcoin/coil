@@ -55,15 +55,14 @@ def main():
 					new_last_hash = requests_retry_session().get(url + "/chain/lastHash/")
 				except Exception as x:
 					print(x)
-				
 				else:
-					if new_last_hash:
+					try:
 						message = new_last_hash.json()["message"]
 						if message != last_hash:
 							nonce = 0
 							last_hash = message
-					else:
-						raise "Didn't get response"
+					except:
+						raise Exception("Didn't get response")
 
 			if validProof(last_hash, nonce):
 				payload = {
