@@ -114,12 +114,10 @@ class Node(object):
         f.close()
 
     def readFromDisk(self):
-        try:
-            f = open(CONFIG_FOLDER + "/blockchain/chain.json", "r")
-            response = json.loads(f.read())
-            return chainFromResponse(response["chain"])
-        except:
-            return False
+        f = open(CONFIG_FOLDER + "/blockchain/chain.json", "r")
+        response = json.loads(f.read())
+        return chainFromResponse(response)
+
         
     def ping(self, nodeloc):
         # Pinging a Wire node...
@@ -132,7 +130,7 @@ class Node(object):
             else:
                 return False
 
-        except requests.exceptions.RequestException:
+        except:
             # Remove peer from pool
             # & then broastcast
             return False
