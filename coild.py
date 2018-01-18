@@ -43,7 +43,12 @@ if len(sys.argv) > 1:
 else:
     PORT = 1337
 
-creator = readWallet(WALLET_FOLDER + "master.json")
+creator = None
+if WALLET_FOLDER.endswith("/"):
+    creator = readWallet(WALLET_FOLDER + "master.json")
+else:
+    creator = readWallet(WALLET_FOLDER + "/master.json")
+    
 node = Node(creator.address, creator.publicKeyHex, HOST + ":" + str(PORT))
 
 def downloadPlain(fname, txt):
