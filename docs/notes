@@ -1,0 +1,2 @@
+* Load chain if can't connect to nodes
+* Fix join with retry

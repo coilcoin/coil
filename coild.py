@@ -21,7 +21,7 @@
 
 __version__ = "0.1.0"
 
-from coil.wallet import readWallet, writeWallet, Wallet
+from coil.wallet import readWallet, writeWallet, exportWallet, Wallet
 from coil.tx import Transaction
 from coil.node import Node
 
@@ -49,6 +49,12 @@ else:
 
 creator = readWallet(WALLET_FOLDER + "master.json")
 node = Node(creator.address, creator.publicKeyHex, HOST + ":" + str(PORT))
+
+def downloadPlain(fname, txt):
+    return Response(response=txt,
+        content_type="application/json",
+        mimetype="application/json",
+        headers={"Content-disposition": "attachment; filename=" + fname + ".json"})
 
 def respondPlain(txt):
     return Response(response=txt, content_type="application/json")
@@ -181,6 +187,14 @@ def mine():
 
     except:
         return respondMessage("Failed to mine block")
+
+@app.route("/wallet/")
+@app.route("/wallet/<label>/")
+def wallet(label=None):
+    if label:
+        return downloadPlain(label, exportWallet(Wallet()))
+    else:
+        return downloadPlain("wallet", exportWallet(Wallet()))
 
 if __name__ == "__main__":
     app.run(host=HOST, port=PORT, debug=True)

@@ -40,17 +40,7 @@ python coil.py
 ```
 
 ## Wallet
-
-**The current web wallet has been deprecated and now lives in a legacy repository. A new wallet in under development and shall be available for testing soon**
-The wallet is a simple Python Flask application that stores the wallet meta data on disk meaning that anyone who is connected to the server can process a transaction. Therefore, DO NOT allow others to access your wallet server, instead only run the server locally on a trusted and secure network.
-
-To run the server, within the coil directory, simply run the following code in bash...
-
-```bash
-python web-wallet/wallet.py
-```
-
-This will start a local server running on port 5000. To access the wallet, open a browser and visit `http://localhost:5000/`. The wallet details are stored in the directory `web-wallet/wallet`, so to export or import a wallet it is suggested that you manage this folder yourself.
+To generate a wallet, visit `/wallet` on the server or to name the file, visit `/wallet/wallet_name`.
 
 ## Proof of work
 The proof of work algorithm used by Coil is called current. A valid proof is constructed from a nonce and previous hash. The resulting hash of these components must contain a character that is repeated atleast as many times as the TARGET value.
