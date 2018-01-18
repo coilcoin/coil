@@ -23,8 +23,7 @@ sudo apt install python3 python3-pip3
 sudo pip3 install flask requests
 ```
 
-Add a known peer to the peers.txt folder (remove any existing IPs)
-
+Add a known peer to the peers.txt folder (remove any existing IPs) and then edit the `config.py` file within the COIL directory and point it to your wallets directory (should just be a case of changing the username within the path).
 
 Finally generate a new wallet for the node to use and run the `coild` program
 ```bash
