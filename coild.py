@@ -28,6 +28,7 @@ from coil.node import Node
 from config import *
 
 import sys
+import json
 import binascii
 from time import time
 from pathlib import Path
@@ -41,11 +42,6 @@ if len(sys.argv) > 1:
     PORT = int(sys.argv[1])
 else:
     PORT = 1337
-
-################################################
-# creator = Wallet()
-# writeWallet(WALLET_FOLDER + "master.json", creator)
-################################################
 
 creator = readWallet(WALLET_FOLDER + "master.json")
 node = Node(creator.address, creator.publicKeyHex, HOST + ":" + str(PORT))
@@ -191,10 +187,11 @@ def mine():
 @app.route("/wallet/")
 @app.route("/wallet/<label>/")
 def wallet(label=None):
+    wallet = json.dumps(exportWallet(Wallet()))
     if label:
-        return downloadPlain(label, exportWallet(Wallet()))
+        return downloadPlain(label, wallet)
     else:
-        return downloadPlain("wallet", exportWallet(Wallet()))
+        return downloadPlain("wallet", wallet)
 
 if __name__ == "__main__":
     app.run(host=HOST, port=PORT, debug=True)

@@ -22,7 +22,7 @@ def verifySignature(pubkey, message, signature):
     return verifier.verify(h, binascii.unhexlify(signature))
 
 def exportWallet(wallet):
-    return { 
+    return {
         "privateKey": wallet.privateKey.exportKey("PEM").decode("utf8"),
         "publicKey": wallet.publicKey.exportKey("PEM").decode("utf8"),
         "address": wallet.address,
