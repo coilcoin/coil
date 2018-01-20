@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 from pathlib import Path
 from time import time
 
-from coil.tx import Transaction, Coinbase, createInput
+from coil.tx import Transaction, Coinbase, createInput, createOutput
 from coil.block import Block
 from coil.chain import Chain
 from coil.wallet import Wallet

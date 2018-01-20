@@ -154,15 +154,16 @@ def resolve_mempool():
 def transaction():
     if request.method == "POST":
         # privatekey, inputs, outputs
-        private = request.form.get("private")
-        public = request.form.get("public")
-        inputs = request.forms.get("inputs")
-        outputs = request.forms.get("outputs")
+        data = request.json
+        private = data["private"]
+        public = data["public"]
+        inputs = data["inputs"]
+        outputs = data["outputs"]
 
         # Create Wallet object from POST
         if private and public and inputs and outputs:
             transactor = Wallet(privateKey=binascii.unhexlify(private), publicKey=binascii.unhexlify(public))
-            tx = Transaction(wallet.address, inputs, outputs, wallet.publicKeyHex)
+            tx = Transaction(transactor.address, inputs, outputs, transactor.publicKeyHex)
             tx.sign(transactor.sign(tx.hash()))
 
             # Submit transaction to node
