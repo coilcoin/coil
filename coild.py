@@ -145,6 +145,10 @@ def balance(address):
 def mempool():
     return jsonify(pool=node.getMemPool())
 
+@app.route("/mempool/hashes/")
+def mempool_hashes():
+    return jsonify(pool=node.getMemPoolHashes())
+
 @app.route("/resolve/mempool/")
 def resolve_mempool():
     mem = node.resolveMemPool()
@@ -186,9 +190,8 @@ def mine():
         success = node.submitBlock(address, minerPubKey, previousBlockHash, nonce, transactionHashes)
         node.broadcast("/resolve/chain/")
         return respondMessage("Successfully submitted block")
-
-    except:
-        return respondMessage("Failed to mine block")
+    else:
+        return respondMessage("Could not mine block")
 
 @app.route("/wallet/")
 @app.route("/wallet/<label>/")

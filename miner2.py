@@ -2,8 +2,10 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
+import sys
 import hashlib
 import datetime
+import random
 
 from pathlib import Path
 from coil.wallet import readWallet
@@ -62,13 +64,29 @@ def main():
 							last_hash = message
 
 			if validProof(last_hash, nonce):
-				payload = {
-					'minerAddress': miner.address,
-					'previousBlockHash': last_hash,
-					'nonce': str(nonce),
-					'transactionHashes': '',
-					'minerPubKey': miner.publicKeyHex
-				}
+				# Select 5 random hashes from the pool
+				hashes = []
+
+				try:
+					picks = 5
+					pool_hashes = requests.get(url + "/mempool/hashes/").json()["pool"]
+					if len(pool_hashes) == 0:
+						print("Waiting for transactions to process")
+					if len(pool_hashes) < picks:
+						hashes = random.sample(pool_hashes, len(pool_hashes))
+					else:
+						hashes = random.sample(pool_hashes, picks)
+
+					payload = {
+						'minerAddress': miner.address,
+						'previousBlockHash': last_hash,
+						'nonce': str(nonce),
+						'transactionHashes': hashes,
+						'minerPubKey': miner.publicKeyHex
+					}
+				except:
+					print("Could not download mempool")
+					sys.exit()
 
 				r = None
 				try:

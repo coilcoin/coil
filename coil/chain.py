@@ -143,7 +143,7 @@ class Chain(object):
         
         return transcode
 
-    def appendBlock(self, minerAddress, minerPubKey, prevBlockHash, nonce, transactionHashes):
+    def appendBlock(self, mempool, minerAddress, minerPubKey, prevBlockHash, nonce, transactionHashes):
         if verifyBlock(self.chain, prevBlockHash, nonce, transactionHashes):
             txs = []
 
@@ -157,7 +157,7 @@ class Chain(object):
                 return False
 
             # Select transactions
-            for tr in self.mempool:
+            for tr in mempool:
                 for th in transactionHashes:
                     if tr.hash() == th:
                         txs.append(tr)
@@ -169,10 +169,6 @@ class Chain(object):
             # Add new block
             b = block.Block(self.lastBlock.hash(), nonce, txs, mr)
             self.chain.append(b)
-    
-            # Remove mined transactions from pool
-            # for tr in txs:
-            # 	self.mempool.remove(tr)
 
             return True
         else:

@@ -9,11 +9,21 @@ from coil import chash
 
 # Target is determined by proof_test.py
 
+# def proof(prevHash, nonce):
+#     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
+#     if result[:6] == "000000":
+#         return result
+
+# def validProof(prevHash, nonce):
+#     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
+#     return result[:6] == "000000"
+
+# DEBUG: EASY PROOF
 def proof(prevHash, nonce):
     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
-    if result[:6] == "000000":
+    if result[:4] == "0000":
         return result
 
 def validProof(prevHash, nonce):
     result = chash.doubleHashEncode(str(prevHash) + str(nonce))
-    return result[:6] == "000000"
+    return result[:4] == "0000"

@@ -228,6 +228,9 @@ class Node(object):
     def getMemPool(self):
         return [ tx.__dict__ for tx in self.mempool ]
 
+    def getMemPoolHashes(self):
+        return [ tx.hash() for tx in self.mempool ]
+
     def resolveMemPool(self):
         memPools = {}
 
@@ -247,4 +250,9 @@ class Node(object):
 
     def submitBlock(self, address, minerPubKey, previousBlockHash, nonce, transactionHashes):
         # Broadcast to all the new block
-        self.chain.appendBlock(address, minerPubKey, previousBlockHash, nonce, transactionHashes)
+        if self.chain.appendBlock(self.mempool, address, minerPubKey, previousBlockHash, nonce, transactionHashes):
+            # Remove blocks from memPool
+            self.mempool = [item for item in self.mempool if not item.hash() in transactionHashes]
+            return True
+        else:
+            return False
